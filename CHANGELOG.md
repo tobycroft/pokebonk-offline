@@ -1,5 +1,11 @@
 # pokebonk-offline-builder
 
+## 0.0.27
+
+### Patch Changes
+
+- 98e42ca: Find draft releases through GitHub's authenticated release collection so local publication can verify and resume uploads before making them public.
+
 ## 0.0.26
 
 ### Patch Changes
