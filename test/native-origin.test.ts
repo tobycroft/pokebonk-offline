@@ -17,6 +17,13 @@ test('native asset origins boot while unrelated mirrors remain blocked',()=>{
     for(const url of ['https://example.com/','https://game/','pokebonk://game.evil/','pokebonk://game:123/','pokebonk://game@evil/','https://appassets.androidplatform.net.evil/','http://appassets.androidplatform.net/'])assert.equal(boots(patched,url),false,url);
   }
 });
+test('whitelisted web hosts boot exactly while other hosts remain blocked',()=>{
+  const patched=patchNativeOriginGate(entry,['game.example.com']);
+  assert.equal(boots(patched,'https://game.example.com/index.html'),true);
+  assert.equal(boots(patched,'https://game.example.com.evil/'),false);
+  assert.equal(boots(patched,'https://example.com/'),false);
+  assert.throws(()=>patchNativeOriginGate(entry,['not a host']),/Invalid web host whitelist entry/);
+});
 test('entries without an origin gate stay byte-identical and unknown gates fail closed',()=>{
   const previous='loadGame();';
   assert.equal(patchNativeOriginGate(previous),previous);

@@ -1,6 +1,16 @@
 import {ast,nodesOf,one,maybeName,nameOf,edits,requireNode,literal} from './source.ts';
 
-export function patchNativeOriginGate(source:string) {
+const webHostPattern=/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$/;
+// Optional exact-match web deployment hosts (POKEBONK_WEB_HOSTS, comma-separated).
+// Empty by default so official desktop and Android builds stay unchanged.
+function webHosts(env:string|undefined) {
+  return (env??'').split(',').map(host=>host.trim().toLowerCase()).filter(Boolean).map(host=>{
+    if(!webHostPattern.test(host))throw new Error(`Invalid web host whitelist entry: ${host}`);
+    return host;
+  });
+}
+export function patchNativeOriginGate(source:string,extraHosts?:readonly string[]) {
+  const web=webHosts(extraHosts===undefined?process.env['POKEBONK_WEB_HOSTS']:[...extraHosts].join(','));
   const tree=ast(source);
   const hostname=nodesOf(tree,'MemberExpression',n=>n.object.type==='Identifier'&&n.object.name==='location'&&maybeName(n.property)==='hostname');
   if(!hostname.length)return source;
@@ -16,5 +26,7 @@ export function patchNativeOriginGate(source:string) {
   // These are the existing local asset origins, not additional website hosts.
   // Keep both origins stable so native upgrades retain their Web Storage.
   const native=`location.href.startsWith('pokebonk://game/')||location.href.startsWith('https://appassets.androidplatform.net/')`;
-  return edits(source,[{start:gate.start,end:gate.end,text:`(${source.slice(gate.start,gate.end)}||${native})`}]);
+  const webChecks=web.map(host=>`location.hostname===${JSON.stringify(host)}`).join('||');
+  const extensions=webChecks?`${native}||${webChecks}`:native;
+  return edits(source,[{start:gate.start,end:gate.end,text:`(${source.slice(gate.start,gate.end)}||${extensions})`}]);
 }
