@@ -233,6 +233,28 @@ export function patchRemoveTrainerMailButtons(source:string) {
   return edits(source,changes);
 }
 
+// The account name in the trainer bar is `ue=Z('b',{},o.guest?c('Invitado'):o.name)`,
+// which renders "Local Sandbox" offline. Clear the name text but keep the <b> element:
+// clanStatus still calls ue.prepend(clan tag), so the variable must stay defined.
+export function patchHideTrainerName(source:string) {
+  const tree=ast(source);
+  const variable=one(nodesOf(tree,'VariableDeclarator',node=>{
+    const init=node.init;
+    if(init?.type!=='CallExpression'||maybeName(init.callee)!=='Z')return false;
+    const args=init.arguments;
+    if(literal(args[0])!=='b'||args[1]?.type!=='ObjectExpression'||args[1].properties.length!==0)return false;
+    const text=args[2];
+    if(text?.type!=='ConditionalExpression')return false;
+    const tokens=[...nodesOf(text,'Literal'),...nodesOf(text,'TemplateLiteral')].map(literal);
+    return tokens.includes('Invitado')&&nodesOf(text,'Identifier',n=>n.name==='name').length>0;
+  }),'trainer name element');
+  const init=variable.init;
+  if(init?.type!=='CallExpression'||init.arguments.length!==3)
+    throw new Error('Unsupported upstream: trainer name element has unexpected shape');
+  // Drop the name expression (and its preceding comma), leaving Z('b',{}).
+  return edits(source,[{start:init.arguments[1]!.end,end:init.arguments[2]!.end,text:''}]);
+}
+
 // The main menu's right-side season/leaderboard panel is the x7(e) child of the mm root.
 export function patchRemoveSeasonPanel(source:string) {
   const tree=ast(source);

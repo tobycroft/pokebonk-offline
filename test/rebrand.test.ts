@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {brandName,patchMenuBranding,patchRemoveVersionBadge,patchRemoveLogout,patchRemoveMenuButtons,patchRemoveTopButtons,patchRemoveSeasonPanel,patchRemoveRankingTile,patchRemoveClanTile,patchRemoveEventCard,patchRemoveTrainerMailButtons,patchEntryBranding,patchHtmlBranding} from '../scripts/rebrand.ts';
+import {brandName,patchMenuBranding,patchRemoveVersionBadge,patchRemoveLogout,patchRemoveMenuButtons,patchRemoveTopButtons,patchRemoveSeasonPanel,patchRemoveRankingTile,patchRemoveClanTile,patchRemoveEventCard,patchRemoveTrainerMailButtons,patchHideTrainerName,patchEntryBranding,patchHtmlBranding} from '../scripts/rebrand.ts';
 
 const menus=`
 function j5(e=\`normal\`){let t=e===\`hero\`;return Z(\`div\`,{class:\`logo\`},Z(\`div\`,{class:\`logo-word\`},\`Poké\`,Z(\`span\`,{class:\`logo-bonk\`},...t?[...\`Bonk\`].map((e,t)=>e):[\`Bonk\`]),Z(\`small\`,{class:\`logo-com\`},\`.com\`),t?Z(\`b\`,{class:\`logo-glint\`},\`PokéBonk\`):null))}
@@ -163,6 +163,25 @@ test('unexpected trainer mail structure fails closed',()=>{
   assert.throws(()=>patchRemoveTrainerMailButtons(trainerMail.replace('tr-mail tr-news\`,title:c(\`Noticias\`','tr-mail tr-news\`,title:c(\`Otro\`')),/Noticias button variable/);
   assert.throws(()=>patchRemoveTrainerMailButtons(trainerMail.replace('o.guest?null:pe','o.guest?x:pe')),/not adjacent arguments/);
   assert.throws(()=>patchRemoveTrainerMailButtons(trainerMail.replace('o.guest?Z(\`button\`,{class:\`btn small blue\`},c(\`Guardar en cuenta\`)):fe','o.guest?Z(\`button\`,{class:\`btn small blue\`},c(\`Guardar en cuenta\`)):xg')),/not adjacent arguments/);
+});
+
+const trainerName=`
+let ue=Z(\`b\`,{},o.guest?c(\`Invitado\`):o.name),de=Z(\`button\`,{class:\`tr-mail tr-news\`},Q(\`news\`,26));
+let _e=Z(\`div\`,{class:\`trainer\`},Z(\`div\`,{class:\`tr-tx\`},ue,n.title?Z(\`small\`,{class:\`tr-title\`},Ve(n.title,R9)):null),de);
+he||=(ue.prepend(M\$(t.clan.tag)),!0);
+`;
+
+test('trainer account name text is cleared while the element and clan tag stay',()=>{
+  const patched=patchHideTrainerName(trainerName);
+  assert.match(patched,/let ue=Z\(\`b\`,\{\}\)/);
+  assert.doesNotMatch(patched,/c\(\`Invitado\`\):o\.name/);
+  assert.match(patched,/class:\`tr-tx\`\},ue/);
+  assert.match(patched,/ue\.prepend\(M\$\(t\.clan\.tag\)\)/);
+});
+
+test('unexpected trainer name structure fails closed',()=>{
+  assert.throws(()=>patchHideTrainerName(trainerName.replace('c(\`Invitado\`)','c(\`Huesped\`)')),/trainer name element/);
+  assert.throws(()=>patchHideTrainerName(trainerName.replace('Z(\`b\`,{},','Z(\`b\`,{class:\`x\`},')),/trainer name element/);
 });
 
 test('unexpected season panel structure fails closed',()=>{
