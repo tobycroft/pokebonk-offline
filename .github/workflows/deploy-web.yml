@@ -45,7 +45,7 @@ jobs:
           external_repository: tobycroft/fe_baoke
           publish_branch: master
           publish_dir: build/game
-          force_orphan: true
+          force_orphan: false
           user_name: github-actions[bot]
           user_email: 41898282+github-actions[bot]@users.noreply.github.com
           commit_message: 'chore: deploy web build ${{ github.sha }}'
