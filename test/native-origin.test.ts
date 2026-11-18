@@ -24,6 +24,10 @@ test('whitelisted web hosts boot exactly while other hosts remain blocked',()=>{
   assert.equal(boots(patched,'https://example.com/'),false);
   assert.throws(()=>patchNativeOriginGate(entry,['not a host']),/Invalid web host whitelist entry/);
 });
+test('origin gate can be removed for unrestricted web hosting',()=>{
+  const patched=patchNativeOriginGate(entry,undefined,true);
+  for(const url of ['https://example.com/','https://game.example.com.evil/','http://appassets.androidplatform.net:1234/'])assert.equal(boots(patched,url),true,url);
+});
 test('entries without an origin gate stay byte-identical and unknown gates fail closed',()=>{
   const previous='loadGame();';
   assert.equal(patchNativeOriginGate(previous),previous);

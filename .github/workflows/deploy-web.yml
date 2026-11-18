@@ -28,14 +28,16 @@ jobs:
         with:
           version: 10.33.2
       - run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Run unit tests
+        run: pnpm test
       - name: Build web payload
         env:
-          POKEBONK_WEB_HOSTS: pb.tuuz.fun
+          POKEBONK_ALLOW_ANY_ORIGIN: '1'
         run: pnpm prepare:game
       - name: Verify payload integrity
         run: node scripts/verify-game.ts build/game
-      - name: Assert web origin whitelist
-        run: grep -R -q 'pb.tuuz.fun' build/game --include='*.js'
+      - name: Assert origin gate removed
+        run: grep -R -q 'if(!true)' build/game/assets/main-*.js
       - name: Deploy to fe_baoke gh-pages
         uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4
         with:

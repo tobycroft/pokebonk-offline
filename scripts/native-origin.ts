@@ -3,14 +3,15 @@ import {ast,nodesOf,one,maybeName,nameOf,edits,requireNode,literal} from './sour
 const webHostPattern=/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$/;
 // Optional exact-match web deployment hosts (POKEBONK_WEB_HOSTS, comma-separated).
 // Empty by default so official desktop and Android builds stay unchanged.
+// POKEBONK_ALLOW_ANY_ORIGIN=1 removes the gate entirely for unrestricted web hosting.
 function webHosts(env:string|undefined) {
   return (env??'').split(',').map(host=>host.trim().toLowerCase()).filter(Boolean).map(host=>{
     if(!webHostPattern.test(host))throw new Error(`Invalid web host whitelist entry: ${host}`);
     return host;
   });
 }
-export function patchNativeOriginGate(source:string,extraHosts?:readonly string[]) {
-  const web=webHosts(extraHosts===undefined?process.env['POKEBONK_WEB_HOSTS']:[...extraHosts].join(','));
+export function patchNativeOriginGate(source:string,extraHosts?:readonly string[],allowAnyOrigin=process.env['POKEBONK_ALLOW_ANY_ORIGIN']==='1') {
+  const web=allowAnyOrigin?[]:webHosts(extraHosts===undefined?process.env['POKEBONK_WEB_HOSTS']:[...extraHosts].join(','));
   const tree=ast(source);
   const hostname=nodesOf(tree,'MemberExpression',n=>n.object.type==='Identifier'&&n.object.name==='location'&&maybeName(n.property)==='hostname');
   if(!hostname.length)return source;
@@ -28,5 +29,6 @@ export function patchNativeOriginGate(source:string,extraHosts?:readonly string[
   const native=`location.href.startsWith('pokebonk://game/')||location.href.startsWith('https://appassets.androidplatform.net/')`;
   const webChecks=web.map(host=>`location.hostname===${JSON.stringify(host)}`).join('||');
   const extensions=webChecks?`${native}||${webChecks}`:native;
-  return edits(source,[{start:gate.start,end:gate.end,text:`(${source.slice(gate.start,gate.end)}||${extensions})`}]);
+  const replacement=allowAnyOrigin?'true':`(${source.slice(gate.start,gate.end)}||${extensions})`;
+  return edits(source,[{start:gate.start,end:gate.end,text:replacement}]);
 }
