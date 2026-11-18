@@ -3,7 +3,7 @@ name: Deploy web to fe_baoke
 on:
   push:
     branches:
-      - main
+      - master
   workflow_dispatch:
 
 permissions:
@@ -43,7 +43,7 @@ jobs:
         with:
           deploy_key: ${{ secrets.DEPLOY_KEY }}
           external_repository: tobycroft/fe_baoke
-          publish_branch: gh-pages
+          publish_branch: master
           publish_dir: build/game
           force_orphan: true
           cname: baoke.tuuz.fun
