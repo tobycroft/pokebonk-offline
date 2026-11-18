@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {brandName,patchMenuBranding,patchEntryBranding,patchHtmlBranding} from '../scripts/rebrand.ts';
+import {brandName,patchMenuBranding,patchRemoveLogout,patchEntryBranding,patchHtmlBranding} from '../scripts/rebrand.ts';
 
 const menus=`
 function j5(e=\`normal\`){let t=e===\`hero\`;return Z(\`div\`,{class:\`logo\`},Z(\`div\`,{class:\`logo-word\`},\`Poké\`,Z(\`span\`,{class:\`logo-bonk\`},...t?[...\`Bonk\`].map((e,t)=>e):[\`Bonk\`]),Z(\`small\`,{class:\`logo-com\`},\`.com\`),t?Z(\`b\`,{class:\`logo-glint\`},\`PokéBonk\`):null))}
@@ -17,6 +17,24 @@ test('menu logo becomes the Chinese brand while the footer content is removed',(
   assert.doesNotMatch(patched,/`\.com`/);
   assert.doesNotMatch(patched,/fan-game/);
   assert.match(patched,/function J5\(e,t=!1\)\{return Z\(`div`,{class:`mm-legal`}\);\}/);
+});
+
+const trainer=`
+let _e=Z(\`div\`,{class:\`trainer\`},de,o.guest?null:pe,Z(\`button\`,{class:\`btn small blue\`,onclick:()=>C7(e)},c(\`Guardar en cuenta\`)),Z(\`button\`,{class:\`btn small ghost\`,onclick:()=>{Y.click(),s3(c(\`¿Salir de tu cuenta?\`),c(\`Volverás...\`),c(\`Cerrar sesión\`),async()=>{await e.meta.saveNow(),await e.backend.logout(),r7(e)},void 0,\`blue\`)}},c(\`Cerrar sesión\`)));ve=w5(e,\`mm\`);
+`;
+
+test('logout button is removed while the rest of the trainer bar stays',()=>{
+  const patched=patchRemoveLogout(trainer);
+  assert.doesNotMatch(patched,/¿Salir de tu cuenta\?/);
+  assert.doesNotMatch(patched,/btn small ghost/);
+  assert.doesNotMatch(patched,/backend\.logout\(\)/);
+  assert.match(patched,/class:\`trainer\`/);
+  assert.match(patched,/class:\`btn small blue\`/);
+  assert.match(patched,/vediv|ve=w5/);
+});
+
+test('unexpected logout button structure fails closed',()=>{
+  assert.throws(()=>patchRemoveLogout(trainer.replace('¿Salir de tu cuenta?','otra')),/logout button/);
 });
 
 test('unexpected logo structure fails closed',()=>{

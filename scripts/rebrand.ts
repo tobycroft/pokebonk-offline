@@ -1,4 +1,4 @@
-import {ast,nodesOf,literal,edits,maybeName,requireNode} from './source.ts';
+import {ast,nodesOf,one,literal,edits,maybeName,requireNode} from './source.ts';
 import type {AnyNode} from 'acorn';
 
 export const brandName='宝可出击';
@@ -51,6 +51,25 @@ function replaceBrand(source:string,label:string) {
   const count=(source.match(/PokéBonk/g)??[]).length;
   if(!count)throw new Error(`Unsupported upstream: no brand in ${label}`);
   return source.replaceAll('PokéBonk',brandName);
+}
+
+const logoutLabel='¿Salir de tu cuenta?';
+
+export function patchRemoveLogout(source:string) {
+  const tree=ast(source);
+  const hasLabel=(node:AnyNode)=>[...nodesOf(node,'Literal'),...nodesOf(node,'TemplateLiteral')].some(l=>literal(l)===logoutLabel);
+  const button=one(nodesOf(tree,'CallExpression',node=>
+    node.arguments.length>=2&&literal(node.arguments[0])==='button'&&hasLabel(node)
+  ),'logout button');
+  const parent=one(nodesOf(tree,'CallExpression',node=>node.arguments.includes(button)),'logout button parent');
+  const args=parent.arguments;
+  const index=args.indexOf(button);
+  const previous=args[index-1];
+  const next=args[index+1];
+  if(!previous&&!next)throw new Error('Unsupported upstream: logout button is the only argument');
+  const start=next?button.start:previous!.end;
+  const end=next?next.start:button.end;
+  return edits(source,[{start,end,text:''}]);
 }
 
 export function patchEntryBranding(source:string) { return replaceBrand(source,'entry module'); }

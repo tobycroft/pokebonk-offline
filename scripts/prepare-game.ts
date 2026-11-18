@@ -15,7 +15,7 @@ import {readSnapshot,snapshotDirectory} from './upstream-snapshot.ts';
 import {patchLiveRunAlias} from './live-run-alias.ts';
 import {patchOfflineFriends} from './offline-friends.ts';
 import {patchNativeOriginGate} from './native-origin.ts';
-import {patchMenuBranding,patchEntryBranding,patchHtmlBranding} from './rebrand.ts';
+import {patchMenuBranding,patchRemoveLogout,patchEntryBranding,patchHtmlBranding} from './rebrand.ts';
 import {readResourceContract,assertReviewedInputs,assertRequiredResources,resourceContractDigest} from './resource-contract.ts';
 
 const output=path.resolve(process.argv[2]??'build/game');
@@ -39,13 +39,13 @@ const sha=(value:string|Buffer)=>createHash('sha256').update(value).digest('hex'
 const patched = patchGame(main, config, await readFile('dist/runtime/local-backend.js','utf8'),modules.menuPath?{source:menus,path:modules.menuPath}:undefined);
 const live=patchLiveRunAlias(patched.main,patched.menus??patched.main);
 files.set(mainKey, Buffer.from(patchOfflineStorageError(patched.menus?live:patchOfflineFriends(live))));
-if(patched.menus)files.set(modules.menus.name,Buffer.from(patchMenuBranding(patchOptionalLookFrames(patchOfflineFriends(patched.menus),frameStyles))));
+if(patched.menus)files.set(modules.menus.name,Buffer.from(patchRemoveLogout(patchMenuBranding(patchOptionalLookFrames(patchOfflineFriends(patched.menus),frameStyles)))));
 files.set(configKey, Buffer.from(patched.config));
 const entryKey=one([...files.keys()].filter(key=>key.endsWith('.js')&&html.includes(`src="./${key}"`)),'snapshot entry module');
 files.set(entryKey,Buffer.from(patchEntryBranding(patchNativeOriginGate(contents(entryKey)))));
 const csp = "default-src 'self' blob: data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' blob:; frame-src 'none'; object-src 'none'";
 // Native packages serve all assets directly; there is no PWA or service worker.
-const nativeHtml=patchHtmlBranding(html).replace(/<link[^>]+rel=["']manifest["'][^>]*>/g,'').replace('</head>', `<meta http-equiv="Content-Security-Policy" content="${csp}"><script>if(!localStorage.getItem('pokebonk.lang'))localStorage.setItem('pokebonk.lang','zht');</script></head>`);
+const nativeHtml=patchHtmlBranding(html).replace(/<link[^>]+rel=["']manifest["'][^>]*>/g,'').replace('</head>', `<meta http-equiv="Content-Security-Policy" content="${csp}"><script>if(!localStorage.getItem('pokebonk.lang'))localStorage.setItem('pokebonk.lang','zh');</script></head>`);
 files.delete('manifest.webmanifest');
 files.set('index.html',Buffer.from(nativeHtml));
 for(const [key,data] of files)if(key.endsWith('.html'))files.set(key,Buffer.from(data.toString().replace(/((?:src|href)=["'])\/(?!\/)/g,'$1./').replace(/href=(["'])\.\/legal\1/g,'href=$1./legal.html$1')));
