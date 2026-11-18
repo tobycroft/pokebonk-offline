@@ -110,5 +110,25 @@ export function patchRemoveMenuButtons(source:string) {
   return edits(source,removals);
 }
 
+// Top-bar buttons to remove: shop (Bee) and official-apps (cZ, guarded by rZ).
+export function patchRemoveTopButtons(source:string) {
+  const tree=ast(source);
+  const bars=nodesOf(tree,'CallExpression',node=>{
+    const args=node.arguments;
+    if(args.length<2||literal(args[0])!=='div'||args[1]?.type!=='ObjectExpression')return false;
+    return args[1].properties.some(p=>p.type==='Property'&&maybeName(p.key)==='class'&&literal(p.value)==='mm-top');
+  });
+  const bar=one(bars.filter(node=>nodesOf(node,'CallExpression',n=>maybeName(n.callee)==='Bee').length>0)
+    ,'mm-top bar with shop button');
+  const args=bar.arguments;
+  const shopIndex=args.findIndex(a=>a.type==='CallExpression'&&maybeName(a.callee)==='Bee');
+  const appsArg=args[shopIndex+1];
+  const apps=appsArg?.type==='ConditionalExpression'?appsArg.consequent:null;
+  if(shopIndex<1||!apps||apps.type!=='CallExpression'||maybeName(apps.callee)!=='cZ')
+    throw new Error('Unsupported upstream: shop/apps buttons are not adjacent in mm-top');
+  // Remove from the previous argument's end through the apps argument's end (drops both buttons and their commas).
+  return edits(source,[{start:args[shopIndex-1]!.end,end:appsArg!.end,text:''}]);
+}
+
 export function patchEntryBranding(source:string) { return replaceBrand(source,'entry module'); }
 export function patchHtmlBranding(source:string) { return replaceBrand(source,'HTML'); }

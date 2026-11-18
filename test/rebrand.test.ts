@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {brandName,patchMenuBranding,patchRemoveLogout,patchRemoveMenuButtons,patchEntryBranding,patchHtmlBranding} from '../scripts/rebrand.ts';
+import {brandName,patchMenuBranding,patchRemoveLogout,patchRemoveMenuButtons,patchRemoveTopButtons,patchEntryBranding,patchHtmlBranding} from '../scripts/rebrand.ts';
 
 const menus=`
 function j5(e=\`normal\`){let t=e===\`hero\`;return Z(\`div\`,{class:\`logo\`},Z(\`div\`,{class:\`logo-word\`},\`Poké\`,Z(\`span\`,{class:\`logo-bonk\`},...t?[...\`Bonk\`].map((e,t)=>e):[\`Bonk\`]),Z(\`small\`,{class:\`logo-com\`},\`.com\`),t?Z(\`b\`,{class:\`logo-glint\`},\`PokéBonk\`):null))}
@@ -53,6 +53,25 @@ test('bug report, Discord and X buttons are removed while the guide button stays
   assert.match(patched,/f\(\`mini\`,a1\)/);
   assert.match(patched,/f\(\`mini guide\`,a2\)/);
   assert.match(patched,/le\.children\[1\]\.setAttribute/);
+});
+
+const topBar=`
+ve=w5(e,\`mm\`,Z(\`div\`,{class:\`mm-top\`},d$(),Wc()?h7():Uc()?g7():null,g5(e),Bee(e),rZ()?cZ(e):null,_e,ac?_7(ac):null),Z(\`div\`,{class:\`mm-left\`},x7(e)));
+`;
+
+test('shop and apps buttons are removed from the top bar while others stay',()=>{
+  const patched=patchRemoveTopButtons(topBar);
+  assert.doesNotMatch(patched,/Bee\(e\)/);
+  assert.doesNotMatch(patched,/cZ\(e\)/);
+  assert.doesNotMatch(patched,/rZ\(\)/);
+  assert.match(patched,/d\$\(\)/);
+  assert.match(patched,/g5\(e\)/);
+  assert.match(patched,/ac\?_7\(ac\):null/);
+  assert.match(patched,/class:\`mm-top\`/);
+});
+
+test('unexpected top bar structure fails closed',()=>{
+  assert.throws(()=>patchRemoveTopButtons(topBar.replace('rZ()?cZ(e):null','rZ()?qZ(e):null')),/shop\/apps buttons/);
 });
 
 test('unexpected menu button structure fails closed',()=>{
