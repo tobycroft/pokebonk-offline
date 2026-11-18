@@ -160,5 +160,33 @@ export function patchRemoveTopButtons(source:string) {
   return edits(source,[{start:args[shopIndex-1]!.end,end:appsArg!.end,text:''}]);
 }
 
+// The "Beta v1.4.0" badge appended to the main-menu logo (class logo-ver).
+export function patchRemoveVersionBadge(source:string) {
+  const tree=ast(source);
+  const stringsOf=(node:AnyNode)=>[...nodesOf(node,'Literal'),...nodesOf(node,'TemplateLiteral')].map(literal);
+  const hasBadgeMarkers=(node:AnyNode)=>{
+    const tokens=stringsOf(node);
+    return tokens.includes('logo-ver')&&tokens.includes('Beta');
+  };
+  const factory=one([
+    ...nodesOf(tree,'FunctionDeclaration',hasBadgeMarkers),
+    ...nodesOf(tree,'VariableDeclarator',node=>
+      (node.init?.type==='ArrowFunctionExpression'||node.init?.type==='FunctionExpression')&&hasBadgeMarkers(node))
+  ],'version badge factory');
+  const factoryName=maybeName(factory.id);
+  if(!factoryName)throw new Error('Unsupported upstream: version badge factory has no name');
+  const word=one(nodesOf(tree,'CallExpression',node=>{
+    const args=node.arguments;
+    if(args.length<2||literal(args[0])!=='div'||args[1]?.type!=='ObjectExpression')return false;
+    return args[1].properties.some(p=>p.type==='Property'&&maybeName(p.key)==='class'&&literal(p.value)==='logo-word');
+  }),'logo word element');
+  const logo=one(nodesOf(tree,'CallExpression',node=>node.arguments.includes(word)),'logo container');
+  const args=logo.arguments;
+  const badge=args[args.length-1];
+  if(args.indexOf(word)!==args.length-2||badge?.type!=='CallExpression'||maybeName(badge.callee)!==factoryName)
+    throw new Error('Unsupported upstream: version badge is not the logo container last argument');
+  return edits(source,[{start:word.end,end:badge.end,text:''}]);
+}
+
 export function patchEntryBranding(source:string) { return replaceBrand(source,'entry module'); }
 export function patchHtmlBranding(source:string) { return replaceBrand(source,'HTML'); }

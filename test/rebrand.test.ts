@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {brandName,patchMenuBranding,patchRemoveLogout,patchRemoveMenuButtons,patchRemoveTopButtons,patchRemoveSeasonPanel,patchRemoveRankingTile,patchEntryBranding,patchHtmlBranding} from '../scripts/rebrand.ts';
+import {brandName,patchMenuBranding,patchRemoveVersionBadge,patchRemoveLogout,patchRemoveMenuButtons,patchRemoveTopButtons,patchRemoveSeasonPanel,patchRemoveRankingTile,patchEntryBranding,patchHtmlBranding} from '../scripts/rebrand.ts';
 
 const menus=`
 function j5(e=\`normal\`){let t=e===\`hero\`;return Z(\`div\`,{class:\`logo\`},Z(\`div\`,{class:\`logo-word\`},\`Poké\`,Z(\`span\`,{class:\`logo-bonk\`},...t?[...\`Bonk\`].map((e,t)=>e):[\`Bonk\`]),Z(\`small\`,{class:\`logo-com\`},\`.com\`),t?Z(\`b\`,{class:\`logo-glint\`},\`PokéBonk\`):null))}
@@ -107,6 +107,24 @@ test('unexpected season panel structure fails closed',()=>{
 
 test('unexpected top bar structure fails closed',()=>{
   assert.throws(()=>patchRemoveTopButtons(topBar.replace('rZ()?cZ(e):null','rZ()?qZ(e):null')),/shop\/apps buttons/);
+});
+
+const versionBadge=`
+function o6(){let e=Z(\`button\`,{class:\`logo-ver\`+(i6()===Zn?\`\`:\` fresh\`),title:c(\`Novedades\`)},Z(\`b\`,{},c(\`Beta\`)),\`v\${Zn}\`);return e}
+function j5(e=\`normal\`){let t=e===\`hero\`;return Z(\`div\`,{class:\`logo\`+(e===\`normal\`?\`\`:\` \`+e)},Z(\`div\`,{class:\`logo-word\`},\`宝可\`,Z(\`span\`,{class:\`logo-bonk\`},\`出击\`)),o6())}
+`;
+
+test('Beta/version badge is removed from the logo while the wordmark stays',()=>{
+  const patched=patchRemoveVersionBadge(versionBadge);
+  assert.doesNotMatch(patched,/,o6\(\)\)/);
+  assert.match(patched,/class:\`logo-word\`/);
+  assert.match(patched,/class:\`logo\`/);
+  assert.match(patched,/function o6\(\)/);
+});
+
+test('unexpected version badge structure fails closed',()=>{
+  assert.throws(()=>patchRemoveVersionBadge(versionBadge.replace('logo-ver','logo-ver2')),/version badge factory/);
+  assert.throws(()=>patchRemoveVersionBadge(versionBadge.replace(',o6())',',o7())')),/last argument/);
 });
 
 test('unexpected menu button structure fails closed',()=>{
