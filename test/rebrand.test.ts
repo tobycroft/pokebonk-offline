@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {brandName,patchMenuBranding,patchRemoveVersionBadge,patchRemoveLogout,patchRemoveMenuButtons,patchRemoveTopButtons,patchRemoveSeasonPanel,patchRemoveRankingTile,patchEntryBranding,patchHtmlBranding} from '../scripts/rebrand.ts';
+import {brandName,patchMenuBranding,patchRemoveVersionBadge,patchRemoveLogout,patchRemoveMenuButtons,patchRemoveTopButtons,patchRemoveSeasonPanel,patchRemoveRankingTile,patchRemoveClanTile,patchRemoveEventCard,patchEntryBranding,patchHtmlBranding} from '../scripts/rebrand.ts';
 
 const menus=`
 function j5(e=\`normal\`){let t=e===\`hero\`;return Z(\`div\`,{class:\`logo\`},Z(\`div\`,{class:\`logo-word\`},\`Poké\`,Z(\`span\`,{class:\`logo-bonk\`},...t?[...\`Bonk\`].map((e,t)=>e):[\`Bonk\`]),Z(\`small\`,{class:\`logo-com\`},\`.com\`),t?Z(\`b\`,{class:\`logo-glint\`},\`PokéBonk\`):null))}
@@ -99,6 +99,44 @@ test('ranking tile is removed while the other tiles stay',()=>{
 
 test('unexpected ranking tile structure fails closed',()=>{
   assert.throws(()=>patchRemoveRankingTile(tileBar.replace('c(\`Ranking\`)','c(\`Ranking2\`)')),/ranking tile/);
+});
+
+const clanMenu=`
+let ne=te(Q(\`clan\`,36),c(\`Clan\`),c(\`Sin clan\`),c(\`Juega en equipo\`),\`#2563d8\`,()=>l3(e));ne.classList.add(\`clan\`);
+let ce=Z(\`div\`,{class:\`mm-tiles\`},te(WU(\`ultra-ball\`),c(\`Pokédex\`),a),ne,te(WU(\`tm-case\`),c(\`Builds\`),c));
+`;
+
+test('clan tile is detached from the tile bar while its variable stays',()=>{
+  const patched=patchRemoveClanTile(clanMenu);
+  assert.doesNotMatch(patched,/,ne\)/);
+  assert.match(patched,/c\(\`Pokédex\`\),a\),te\(WU\(\`tm-case\`\)/);
+  assert.match(patched,/class:\`mm-tiles\`/);
+  assert.match(patched,/let ne=te\(Q\(\`clan\`/);
+  assert.match(patched,/ne\.classList\.add\(\`clan\`\)/);
+});
+
+test('unexpected clan tile structure fails closed',()=>{
+  assert.throws(()=>patchRemoveClanTile(clanMenu.replace('c(\`Clan\`)','c(\`Clan2\`)')),/clan tile variable/);
+  assert.throws(()=>patchRemoveClanTile(clanMenu.replace(',ne,te(',',ne2,te(').replace('class:\\`mm-tiles\\`,te','class:\\`mm-tiles\\`,te')),/clan tile/);
+});
+
+const eventMenu=`
+function n8(e,t){let n=t8(e)[0];if(!n)return null;let a=t(\`event\`,Q(n.art.icon,40),c(n.name),i,n.color,()=>s8(e,n.id));return a}
+let re=n8(e,f),ie=r8(e,f);
+ve=w5(e,\`mm\`,Z(\`div\`,{class:\`mm-nav\`},y,Z(\`div\`,{class:\`mm-today\`},re,ie,T),ce,le));
+`;
+
+test('event card is detached from mm-today while the factory stays',()=>{
+  const patched=patchRemoveEventCard(eventMenu);
+  assert.match(patched,/class:\`mm-today\`\},ie,T/);
+  assert.doesNotMatch(patched,/class:\`mm-today\`\},re,ie/);
+  assert.match(patched,/function n8\(/);
+  assert.match(patched,/let re=n8\(e,f\)/);
+});
+
+test('unexpected event card structure fails closed',()=>{
+  assert.throws(()=>patchRemoveEventCard(eventMenu.replace('t(\`event\`','t(\`event2\`')),/event card factory markers/);
+  assert.throws(()=>patchRemoveEventCard(eventMenu.replace('re=n8(e,f)','re=q8(e,f)')),/event card variable/);
 });
 
 test('unexpected season panel structure fails closed',()=>{

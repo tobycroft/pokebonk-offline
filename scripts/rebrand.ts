@@ -128,6 +128,66 @@ export function patchRemoveRankingTile(source:string) {
   return edits(source,[{start:prev.end,end:ranking.end,text:''}]);
 }
 
+// Read the first string argument of a call like Q('clan',36) or c('Clan').
+const callString=(node:AnyNode|null|undefined,callee:string):string|undefined=>{
+  if(node?.type!=='CallExpression'||maybeName(node.callee)!==callee)return undefined;
+  const value=literal(node.arguments[0]!);
+  return typeof value==='string'?value:undefined;
+};
+
+// The "Clan / 战队" tile of the main menu (class clan) is the `ne` argument of mm-tiles.
+// Keep the variable definition itself: other menu code (clan status updates) still reads it,
+// so only detach it from the tile bar to avoid null dereferences at runtime.
+export function patchRemoveClanTile(source:string) {
+  const tree=ast(source);
+  const clanTile=one(nodesOf(tree,'VariableDeclarator',node=>{
+    const init=node.init;
+    if(init?.type!=='CallExpression'||maybeName(init.callee)!=='te'||init.arguments.length<2)return false;
+    return callString(init.arguments[0],'Q')==='clan'&&callString(init.arguments[1],'c')==='Clan';
+  }),'clan tile variable');
+  const name=maybeName(clanTile.id);
+  if(!name)throw new Error('Unsupported upstream: clan tile has no name');
+  const tiles=one(nodesOf(tree,'CallExpression',node=>{
+    const args=node.arguments;
+    if(args.length<2||literal(args[0])!=='div'||args[1]?.type!=='ObjectExpression')return false;
+    return args[1].properties.some(p=>p.type==='Property'&&maybeName(p.key)==='class'&&literal(p.value)==='mm-tiles');
+  }),'mm-tiles tile bar');
+  const args=tiles.arguments;
+  const index=args.findIndex(a=>a.type==='Identifier'&&maybeName(a)===name);
+  if(index<1||!args[index+1])throw new Error('Unsupported upstream: clan tile is not a non-last mm-tiles argument');
+  // Drop from the previous argument's end through the clan argument's end (removes the comma too).
+  return edits(source,[{start:args[index-1]!.end,end:args[index]!.end,text:''}]);
+}
+
+// The live-event card ("La Gran Expedición / 大探险") is the `re` argument of mm-today.
+// n8() builds a card from the first live event; detach the variable from the container while
+// leaving the factory defined so other event-related code keeps working.
+export function patchRemoveEventCard(source:string) {
+  const tree=ast(source);
+  const factories=[
+    ...nodesOf(tree,'FunctionDeclaration',node=>maybeName(node.id)==='n8'),
+    ...nodesOf(tree,'VariableDeclarator',node=>maybeName(node.id)==='n8'&&(node.init?.type==='ArrowFunctionExpression'||node.init?.type==='FunctionExpression'))
+  ];
+  if(factories.length!==1)throw new Error(`Unsupported upstream: event card factory: expected one match, got ${factories.length}`);
+  const factory=factories[0]!;
+  const tokens=[...nodesOf(factory,'Literal'),...nodesOf(factory,'TemplateLiteral')].map(literal);
+  if(!tokens.includes('event'))throw new Error('Unsupported upstream: event card factory markers missing');
+  const variable=one(nodesOf(tree,'VariableDeclarator',node=>
+    maybeName(node.id)==='re'&&node.init?.type==='CallExpression'&&maybeName(node.init.callee)==='n8'
+  ),'event card variable');
+  const name=maybeName(variable.id);
+  if(!name)throw new Error('Unsupported upstream: event card variable has no name');
+  const today=one(nodesOf(tree,'CallExpression',node=>{
+    const args=node.arguments;
+    if(args.length<2||literal(args[0])!=='div'||args[1]?.type!=='ObjectExpression')return false;
+    return args[1].properties.some(p=>p.type==='Property'&&maybeName(p.key)==='class'&&literal(p.value)==='mm-today');
+  }),'mm-today container');
+  const args=today.arguments;
+  const index=args.findIndex(a=>a.type==='Identifier'&&maybeName(a)===name);
+  if(index<2||!args[index+1])throw new Error('Unsupported upstream: event card is not a non-last mm-today argument');
+  return edits(source,[{start:args[index]!.start,end:args[index+1]!.start,text:''}]);
+}
+
 // The main menu's right-side season/leaderboard panel is the x7(e) child of the mm root.
 export function patchRemoveSeasonPanel(source:string) {
   const tree=ast(source);
