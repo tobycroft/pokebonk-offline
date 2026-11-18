@@ -7,10 +7,11 @@ export function gameModules(files:ReadonlyMap<string,Uint8Array>) {
   const menus=one(modules.filter(module=>module.source.includes('lastSpecies')&&nodesOf(ast(module.source),'FunctionDeclaration',fn=>
     nodesOf(fn.body,'ReturnStatement',node=>node.argument?.type==='ObjectExpression'&&['stardust','lab','league','lastSpecies','settings'].every(key=>node.argument?.type==='ObjectExpression'&&node.argument.properties.some(p=>p.type==='Property'&&maybeName(p.key)===key))).length>0).length>0),'snapshot profile module');
   const config=one(modules.filter(module=>module!==main&&module!==menus&&module.source.includes('slot-move')),'snapshot configuration module');
+  const withoutQuery=(value:string)=>value.split('?')[0]!;
   const menuPath=menus===main?undefined:one([...new Set(nodesOf(ast(main.source),'ImportDeclaration',node=>{
     const value=literal(node.source);
-    return typeof value==='string'&&value.startsWith('./')&&path.posix.join(path.posix.dirname(main.name),value)===menus.name;
-  }).map(node=>literal(node.source)))],'application menu import');
+    return typeof value==='string'&&value.startsWith('./')&&path.posix.join(path.posix.dirname(main.name),withoutQuery(value))===menus.name;
+  }).map(node=>literal(node.source) as string).map(withoutQuery))],'application menu import');
   if(menuPath!==undefined&&typeof menuPath!=='string')throw new Error('Unsupported menu import');
   return {main,config,menus,menuPath};
 }

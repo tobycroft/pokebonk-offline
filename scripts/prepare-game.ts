@@ -16,6 +16,7 @@ import {patchLiveRunAlias} from './live-run-alias.ts';
 import {patchOfflineFriends} from './offline-friends.ts';
 import {patchNativeOriginGate} from './native-origin.ts';
 import {patchMenuBranding,patchRemoveVersionBadge,patchRemoveLogout,patchRemoveMenuButtons,patchRemoveTopButtons,patchRemoveSeasonPanel,patchRemoveRankingTile,patchEntryBranding,patchHtmlBranding} from './rebrand.ts';
+import {cacheBustVersion,injectCacheBust,injectHtmlCacheBust} from './cache-bust.ts';
 import {readResourceContract,assertReviewedInputs,assertRequiredResources,resourceContractDigest} from './resource-contract.ts';
 
 const output=path.resolve(process.argv[2]??'build/game');
@@ -52,6 +53,15 @@ for(const [key,data] of files)if(key.endsWith('.html'))files.set(key,Buffer.from
 files.set('version.json', Buffer.from(JSON.stringify({build:buildId,version})));
 files.set('resource-audit.json',Buffer.from(JSON.stringify({contractDigest:resourceContractDigest(resourceContract)})));
 files.set('offline-build.json', Buffer.from(JSON.stringify({upstreamBuild:buildId,upstreamVersion:version,offlineVersion:await offlineVersion(),sourceDigest:await sourceDigest(snapshotRoot),variant:'unlock-all',league:info.roster.length,lab:info.lab.length,items:info.items.length,achievements:info.quests.length,medals:info.biomes.filter(b=>Number.isFinite(b.size)).length*3,medalRank:info.medalRanks.length,statusIcons,reactionIcons,itemIcons,builder:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim()},null,2)));
+// Cache busting: derive one version from every finalized payload byte, then add
+// ?v=<version> to all asset URLs. This is done after all patches but before
+// writing, so name-based module detection and manifest paths stay intact while
+// any content change forces a fresh URL through browser/nginx/CDN caches.
+const bust=cacheBustVersion(files);
+for(const [key,data] of files){
+  if(key.endsWith('.js'))files.set(key,Buffer.from(injectCacheBust(data.toString(),bust)));
+  else if(key.endsWith('.html'))files.set(key,Buffer.from(injectHtmlCacheBust(data.toString(),bust)));
+}
 await rm(output,{recursive:true,force:true});
 for (const [key,data] of files) { const target=path.join(output,key);await mkdir(path.dirname(target),{recursive:true});await writeFile(target,data); }
 const entries=[...files].map(([name,data])=>({name,bytes:data.length,sha256:sha(data)})).sort((a,b)=>a.name<b.name?-1:a.name>b.name?1:0);
