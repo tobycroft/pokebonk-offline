@@ -50,7 +50,7 @@ class LocalSandboxBackend implements LocalBackendContract {
   async status() {
     return { maintenance: { on: false }, registration: { inviteOnly: false }, season: this.season(), events: this.events() };
   }
-  async restore() { document.title = 'PokéBonk Offline — Unlock All'; return this.account; }
+  async restore() { return this.account; }
   async guest() { return this.account; }
   guestSave() { return true; }
   async logout() { throw new Error('Local sandbox: no online account is connected.'); }
