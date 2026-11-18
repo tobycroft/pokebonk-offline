@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {brandName,patchMenuBranding,patchRemoveLogout,patchEntryBranding,patchHtmlBranding} from '../scripts/rebrand.ts';
+import {brandName,patchMenuBranding,patchRemoveLogout,patchRemoveSocialButtons,patchEntryBranding,patchHtmlBranding} from '../scripts/rebrand.ts';
 
 const menus=`
 function j5(e=\`normal\`){let t=e===\`hero\`;return Z(\`div\`,{class:\`logo\`},Z(\`div\`,{class:\`logo-word\`},\`Poké\`,Z(\`span\`,{class:\`logo-bonk\`},...t?[...\`Bonk\`].map((e,t)=>e):[\`Bonk\`]),Z(\`small\`,{class:\`logo-com\`},\`.com\`),t?Z(\`b\`,{class:\`logo-glint\`},\`PokéBonk\`):null))}
@@ -35,6 +35,27 @@ test('logout button is removed while the rest of the trainer bar stays',()=>{
 
 test('unexpected logout button structure fails closed',()=>{
   assert.throws(()=>patchRemoveLogout(trainer.replace('¿Salir de tu cuenta?','otra')),/logout button/);
+});
+
+const socialBar=`
+let le=Z(\`div\`,{class:\`mm-small\`},f(\`mini\`,a1),f(\`mini guide\`,a2),f(\`mini round bug\`,a3),f(\`mini discord\`,a4),f(\`mini x\`,a5));le.lastElementChild.setAttribute(\`title\`,\`@ImCharcher · X\`),le.children[1].setAttribute(\`title\`,c(\`Guía\`)),le.children[2].setAttribute(\`aria-label\`,c(\`Reportar\`));
+`;
+
+test('Discord and X buttons are removed without disturbing the guide/report buttons',()=>{
+  const patched=patchRemoveSocialButtons(socialBar);
+  assert.doesNotMatch(patched,/mini discord/);
+  assert.doesNotMatch(patched,/mini x/);
+  assert.doesNotMatch(patched,/@ImCharcher · X/);
+  assert.doesNotMatch(patched,/lastElementChild/);
+  assert.match(patched,/f\(\`mini\`,a1\)/);
+  assert.match(patched,/f\(\`mini guide\`,a2\)/);
+  assert.match(patched,/f\(\`mini round bug\`,a3\)/);
+  assert.match(patched,/le\.children\[1\]\.setAttribute/);
+  assert.match(patched,/le\.children\[2\]\.setAttribute/);
+});
+
+test('unexpected social button structure fails closed',()=>{
+  assert.throws(()=>patchRemoveSocialButtons(socialBar.replace('`mini x`','`mini y`')),/mini x button/);
 });
 
 test('unexpected logo structure fails closed',()=>{

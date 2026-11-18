@@ -72,5 +72,36 @@ export function patchRemoveLogout(source:string) {
   return edits(source,[{start,end,text:''}]);
 }
 
+const socialButtons=['mini discord','mini x'];
+
+export function patchRemoveSocialButtons(source:string) {
+  const tree=ast(source);
+  const bar=one(nodesOf(tree,'CallExpression',node=>{
+    const args=node.arguments;
+    if(args.length<2||literal(args[0])!=='div'||args[1]?.type!=='ObjectExpression')return false;
+    return args[1].properties.some(p=>p.type==='Property'&&maybeName(p.key)==='class'&&literal(p.value)==='mm-small');
+  }),'mm-small button bar');
+  const buttons=socialButtons.map(label=>one(nodesOf(bar,'CallExpression',node=>
+    literal(node.arguments[0])===label
+  ),`${label} button`));
+  const removals: {start:number;end:number;text:string}[]=[];
+  // The two buttons are the trailing arguments; drop from the previous argument's end.
+  const args=bar.arguments;
+  const firstIndex=args.indexOf(buttons[0]!);
+  const lastButton=buttons[buttons.length-1]!;
+  if(firstIndex<1||args.indexOf(lastButton)!==args.length-1||args.indexOf(lastButton)!==firstIndex+buttons.length-1)
+    throw new Error('Unsupported upstream: social buttons are not trailing arguments');
+  removals.push({start:args[firstIndex-1]!.end,end:lastButton.end,text:''});
+  // Remove the X button's title assignment (first item of a comma sequence).
+  const titleCall=one(nodesOf(tree,'CallExpression',node=>
+    node.arguments.some(a=>literal(a)==='@ImCharcher · X')
+  ),'X button title assignment');
+  const sequence=one(nodesOf(tree,'SequenceExpression',node=>node.expressions.includes(titleCall)),'title sequence');
+  const titleIndex=sequence.expressions.indexOf(titleCall);
+  if(titleIndex!==0||!sequence.expressions[1])throw new Error('Unsupported upstream: X title is not the leading expression');
+  removals.push({start:titleCall.start,end:sequence.expressions[1]!.start,text:''});
+  return edits(source,removals);
+}
+
 export function patchEntryBranding(source:string) { return replaceBrand(source,'entry module'); }
 export function patchHtmlBranding(source:string) { return replaceBrand(source,'HTML'); }
