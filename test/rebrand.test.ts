@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {brandName,patchMenuBranding,patchRemoveLogout,patchRemoveMenuButtons,patchRemoveTopButtons,patchEntryBranding,patchHtmlBranding} from '../scripts/rebrand.ts';
+import {brandName,patchMenuBranding,patchRemoveLogout,patchRemoveMenuButtons,patchRemoveTopButtons,patchRemoveSeasonPanel,patchRemoveRankingTile,patchEntryBranding,patchHtmlBranding} from '../scripts/rebrand.ts';
 
 const menus=`
 function j5(e=\`normal\`){let t=e===\`hero\`;return Z(\`div\`,{class:\`logo\`},Z(\`div\`,{class:\`logo-word\`},\`Poké\`,Z(\`span\`,{class:\`logo-bonk\`},...t?[...\`Bonk\`].map((e,t)=>e):[\`Bonk\`]),Z(\`small\`,{class:\`logo-com\`},\`.com\`),t?Z(\`b\`,{class:\`logo-glint\`},\`PokéBonk\`):null))}
@@ -68,6 +68,41 @@ test('shop and apps buttons are removed from the top bar while others stay',()=>
   assert.match(patched,/g5\(e\)/);
   assert.match(patched,/ac\?_7\(ac\):null/);
   assert.match(patched,/class:\`mm-top\`/);
+});
+
+const seasonRoot=`
+ve=w5(e,\`mm\`,Z(\`div\`,{class:\`mm-top\`},g5(e)),Z(\`div\`,{class:\`mm-left\`},y),x7(e),Z(\`div\`,{class:\`mm-foot\`},J5(()=>ete(e))));
+`;
+
+test('right-side season panel is removed from the main menu root',()=>{
+  const patched=patchRemoveSeasonPanel(seasonRoot);
+  assert.doesNotMatch(patched,/x7\(e\)/);
+  assert.match(patched,/class:\`mm-top\`/);
+  assert.match(patched,/class:\`mm-left\`/);
+  assert.match(patched,/class:\`mm-foot\`/);
+  assert.doesNotMatch(patched,/\),,/);
+});
+
+const tileBar=`
+let ce=Z(\`div\`,{class:\`mm-tiles\`},te(WU(\`ultra-ball\`),c(\`Pokédex\`),a),te(WU(\`star-piece\`),c(\`Logros\`),b),te(Q(\`gold\`,32),c(\`Ranking\`),oe,\`\${c(\`Clasificación\`)} · \${D9(ae)}\`,\`var(--yellow-d)\`,()=>U9(e)),ne,te(WU(\`tm-case\`),c(\`Builds\`),c));
+`;
+
+test('ranking tile is removed while the other tiles stay',()=>{
+  const patched=patchRemoveRankingTile(tileBar);
+  assert.doesNotMatch(patched,/c\(\`Ranking\`\)/);
+  assert.doesNotMatch(patched,/U9\(e\)/);
+  assert.match(patched,/c\(\`Pokédex\`\)/);
+  assert.match(patched,/c\(\`Logros\`\)/);
+  assert.match(patched,/c\(\`Builds\`\)/);
+  assert.match(patched,/class:\`mm-tiles\`/);
+});
+
+test('unexpected ranking tile structure fails closed',()=>{
+  assert.throws(()=>patchRemoveRankingTile(tileBar.replace('c(\`Ranking\`)','c(\`Ranking2\`)')),/ranking tile/);
+});
+
+test('unexpected season panel structure fails closed',()=>{
+  assert.throws(()=>patchRemoveSeasonPanel(seasonRoot.replace('x7(e)','q7(e)')),/x7 season panel call/);
 });
 
 test('unexpected top bar structure fails closed',()=>{

@@ -110,6 +110,36 @@ export function patchRemoveMenuButtons(source:string) {
   return edits(source,removals);
 }
 
+// The bottom "Ranking / Clasificación" tile that opens the season leaderboard.
+export function patchRemoveRankingTile(source:string) {
+  const tree=ast(source);
+  const tiles=one(nodesOf(tree,'CallExpression',node=>{
+    const args=node.arguments;
+    if(args.length<2||literal(args[0])!=='div'||args[1]?.type!=='ObjectExpression')return false;
+    return args[1].properties.some(p=>p.type==='Property'&&maybeName(p.key)==='class'&&literal(p.value)==='mm-tiles');
+  }),'mm-tiles tile bar');
+  const ranking=one(nodesOf(tiles,'CallExpression',node=>
+    maybeName(node.callee)==='te'
+    && nodesOf(node,'CallExpression',inner=>inner.arguments.some(a=>literal(a)==='Ranking')).length>0
+  ),'ranking tile');
+  const prev=tiles.arguments[tiles.arguments.indexOf(ranking)-1];
+  if(!prev||tiles.arguments.indexOf(ranking)<2)
+    throw new Error('Unsupported upstream: ranking tile position unexpected');
+  return edits(source,[{start:prev.end,end:ranking.end,text:''}]);
+}
+
+// The main menu's right-side season/leaderboard panel is the x7(e) child of the mm root.
+export function patchRemoveSeasonPanel(source:string) {
+  const tree=ast(source);
+  const call=one(nodesOf(tree,'CallExpression',node=>maybeName(node.callee)==='x7'),'x7 season panel call');
+  // x7(e) is a standalone argument: preceded by "),", followed by ",Z(".
+  const before=source.slice(Math.max(0,call.start-3),call.start);
+  const after=source.slice(call.end,call.end+3);
+  if(!before.endsWith('),')||!after.startsWith(',Z('))
+    throw new Error('Unsupported upstream: season panel call is not an argument');
+  return edits(source,[{start:call.start-1,end:call.end,text:''}]);
+}
+
 // Top-bar buttons to remove: shop (Bee) and official-apps (cZ, guarded by rZ).
 export function patchRemoveTopButtons(source:string) {
   const tree=ast(source);
