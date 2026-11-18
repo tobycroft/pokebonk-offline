@@ -38,7 +38,7 @@ jobs:
         run: node scripts/verify-game.ts build/game
       - name: Assert origin gate removed
         run: grep -R -q 'if(!true)' build/game/assets/main-*.js
-      - name: Deploy to fe_baoke gh-pages
+      - name: Deploy to fe_baoke master
         uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4
         with:
           deploy_key: ${{ secrets.DEPLOY_KEY }}
@@ -46,7 +46,6 @@ jobs:
           publish_branch: master
           publish_dir: build/game
           force_orphan: true
-          cname: baoke.tuuz.fun
           user_name: github-actions[bot]
           user_email: 41898282+github-actions[bot]@users.noreply.github.com
           commit_message: 'chore: deploy web build ${{ github.sha }}'
