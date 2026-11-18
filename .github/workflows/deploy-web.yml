@@ -1,0 +1,49 @@
+name: Deploy web to fe_baoke
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-web-fe_baoke
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
+        with:
+          version: 10.33.2
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Build web payload
+        env:
+          POKEBONK_WEB_HOSTS: pb.tuuz.fun
+        run: pnpm prepare:game
+      - name: Verify payload integrity
+        run: node scripts/verify-game.ts build/game
+      - name: Assert web origin whitelist
+        run: grep -R -q 'pb.tuuz.fun' build/game --include='*.js'
+      - name: Deploy to fe_baoke gh-pages
+        uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4
+        with:
+          deploy_key: ${{ secrets.DEPLOY_KEY }}
+          external_repository: tobycroft/fe_baoke
+          publish_branch: gh-pages
+          publish_dir: build/game
+          force_orphan: true
+          user_name: github-actions[bot]
+          user_email: 41898282+github-actions[bot]@users.noreply.github.com
+          commit_message: 'chore: deploy web build ${{ github.sha }}'
