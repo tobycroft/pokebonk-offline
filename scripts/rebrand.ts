@@ -188,6 +188,51 @@ export function patchRemoveEventCard(source:string) {
   return edits(source,[{start:args[index]!.start,end:args[index+1]!.start,text:''}]);
 }
 
+// The three account buttons at the top-right of the main-menu trainer bar:
+// news (tr-mail tr-news), friends (a4 helper) and mailbox (tr-mail).
+// Their variables are still read by badge-update code (T1().then, clanStatus),
+// so keep the definitions and only detach them from the trainer container.
+export function patchRemoveTrainerMailButtons(source:string) {
+  const tree=ast(source);
+  const stringsOf=(node:AnyNode)=>[...nodesOf(node,'Literal'),...nodesOf(node,'TemplateLiteral')].map(literal);
+  const trMailVar=(cls:string,title:string)=>one(nodesOf(tree,'VariableDeclarator',node=>{
+    const init=node.init;
+    if(init?.type!=='CallExpression'||maybeName(init.callee)!=='Z')return false;
+    const args=init.arguments;
+    if(literal(args[0])!=='button'||args[1]?.type!=='ObjectExpression')return false;
+    const hasClass=args[1].properties.some(p=>p.type==='Property'&&maybeName(p.key)==='class'&&literal(p.value)===cls);
+    return hasClass&&stringsOf(init).includes(title);
+  }),`${title} button variable`);
+  const news=maybeName(trMailVar('tr-mail tr-news','Noticias').id);
+  const mail=maybeName(trMailVar('tr-mail','Buzón: invitaciones y avisos').id);
+  if(!news||!mail)throw new Error('Unsupported upstream: trainer mail button has no name');
+  const friends=one(nodesOf(tree,'VariableDeclarator',node=>
+    maybeName(node.id)!=='undefined'&&node.init?.type==='CallExpression'&&maybeName(node.init.callee)==='a4'
+  ),'friends button variable');
+  const friendName=maybeName(friends.id);
+  if(!friendName)throw new Error('Unsupported upstream: friends button has no name');
+  const trainer=one(nodesOf(tree,'CallExpression',node=>{
+    const args=node.arguments;
+    if(args.length<2||literal(args[0])!=='div'||args[1]?.type!=='ObjectExpression')return false;
+    return args[1].properties.some(p=>p.type==='Property'&&maybeName(p.key)==='class'&&literal(p.value)==='trainer');
+  }),'trainer bar');
+  const args=trainer.arguments;
+  const newsIdx=args.findIndex(a=>a.type==='Identifier'&&maybeName(a)===news);
+  const friendArg=args[newsIdx+1];
+  const mailArg=args[newsIdx+2];
+  const isGuestFriend=friendArg?.type==='ConditionalExpression'&&literal(friendArg.consequent)===null&&maybeName(friendArg.alternate)===friendName;
+  const isMailCondition=mailArg?.type==='ConditionalExpression'&&maybeName(mailArg.alternate)===mail;
+  if(newsIdx<1||!isGuestFriend||!isMailCondition)
+    throw new Error('Unsupported upstream: trainer news/friends/mail buttons are not adjacent arguments');
+  const changes:{start:number;end:number;text:string}[]=[];
+  // Drop news (plain Identifier) and friends (conditional) arguments entirely.
+  changes.push({start:args[newsIdx-1]!.end,end:friendArg!.end,text:''});
+  // Keep the guest "save account" branch of the mail condition; replace only the mail button with null.
+  const alt=mailArg!.alternate;
+  changes.push({start:alt.start,end:alt.end,text:'null'});
+  return edits(source,changes);
+}
+
 // The main menu's right-side season/leaderboard panel is the x7(e) child of the mm root.
 export function patchRemoveSeasonPanel(source:string) {
   const tree=ast(source);

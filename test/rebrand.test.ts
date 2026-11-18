@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {brandName,patchMenuBranding,patchRemoveVersionBadge,patchRemoveLogout,patchRemoveMenuButtons,patchRemoveTopButtons,patchRemoveSeasonPanel,patchRemoveRankingTile,patchRemoveClanTile,patchRemoveEventCard,patchEntryBranding,patchHtmlBranding} from '../scripts/rebrand.ts';
+import {brandName,patchMenuBranding,patchRemoveVersionBadge,patchRemoveLogout,patchRemoveMenuButtons,patchRemoveTopButtons,patchRemoveSeasonPanel,patchRemoveRankingTile,patchRemoveClanTile,patchRemoveEventCard,patchRemoveTrainerMailButtons,patchEntryBranding,patchHtmlBranding} from '../scripts/rebrand.ts';
 
 const menus=`
 function j5(e=\`normal\`){let t=e===\`hero\`;return Z(\`div\`,{class:\`logo\`},Z(\`div\`,{class:\`logo-word\`},\`Poké\`,Z(\`span\`,{class:\`logo-bonk\`},...t?[...\`Bonk\`].map((e,t)=>e):[\`Bonk\`]),Z(\`small\`,{class:\`logo-com\`},\`.com\`),t?Z(\`b\`,{class:\`logo-glint\`},\`PokéBonk\`):null))}
@@ -137,6 +137,32 @@ test('event card is detached from mm-today while the factory stays',()=>{
 test('unexpected event card structure fails closed',()=>{
   assert.throws(()=>patchRemoveEventCard(eventMenu.replace('t(\`event\`','t(\`event2\`')),/event card factory markers/);
   assert.throws(()=>patchRemoveEventCard(eventMenu.replace('re=n8(e,f)','re=q8(e,f)')),/event card variable/);
+});
+
+const trainerMail=`
+let de=Z(\`button\`,{class:\`tr-mail tr-news\`,title:c(\`Noticias\`),onclick:()=>M1(e)},Q(\`news\`,26));
+let fe=Z(\`button\`,{class:\`tr-mail\`,title:c(\`Buzón: invitaciones y avisos\`),onclick:()=>e6(e)},Q(\`mail\`,26)),pe=a4(e);
+let _e=Z(\`div\`,{class:\`trainer\`},Z(\`button\`,{class:\`tr-av\`},av),Z(\`div\`,{class:\`tr-cur\`},cur),de,o.guest?null:pe,o.guest?Z(\`button\`,{class:\`btn small blue\`},c(\`Guardar en cuenta\`)):fe);
+T1(e).then(()=>{de.isConnected&&(de.title=x),me(fe,t.mail),me(pe,t.friends)});
+`;
+
+test('news/friends/mail buttons are detached while the guest save branch and variables stay',()=>{
+  const patched=patchRemoveTrainerMailButtons(trainerMail);
+  assert.match(patched,/class:\`tr-av\`\},av\),Z\(\`div\`,{class:\`tr-cur\`},cur\),o\.guest\?/);
+  assert.match(patched,/o\.guest\?Z\(\`button\`,{class:\`btn small blue\`},c\(\`Guardar en cuenta\`\)\):null/);
+  assert.doesNotMatch(patched,/cur\),de/);
+  assert.doesNotMatch(patched,/null:pe/);
+  assert.match(patched,/let de=Z\(\`button\`/);
+  assert.match(patched,/let fe=Z\(\`button\`/);
+  assert.match(patched,/pe=a4\(e\)/);
+  assert.match(patched,/de\.isConnected/);
+  assert.match(patched,/me\(fe,t\.mail\),me\(pe,t\.friends\)/);
+});
+
+test('unexpected trainer mail structure fails closed',()=>{
+  assert.throws(()=>patchRemoveTrainerMailButtons(trainerMail.replace('tr-mail tr-news\`,title:c(\`Noticias\`','tr-mail tr-news\`,title:c(\`Otro\`')),/Noticias button variable/);
+  assert.throws(()=>patchRemoveTrainerMailButtons(trainerMail.replace('o.guest?null:pe','o.guest?x:pe')),/not adjacent arguments/);
+  assert.throws(()=>patchRemoveTrainerMailButtons(trainerMail.replace('o.guest?Z(\`button\`,{class:\`btn small blue\`},c(\`Guardar en cuenta\`)):fe','o.guest?Z(\`button\`,{class:\`btn small blue\`},c(\`Guardar en cuenta\`)):xg')),/not adjacent arguments/);
 });
 
 test('unexpected season panel structure fails closed',()=>{
