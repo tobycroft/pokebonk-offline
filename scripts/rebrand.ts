@@ -317,3 +317,14 @@ export function patchRemoveVersionBadge(source:string) {
 
 export function patchEntryBranding(source:string) { return replaceBrand(source,'entry module'); }
 export function patchHtmlBranding(source:string) { return replaceBrand(source,'HTML'); }
+
+// Final pass over every generated text asset. Apply only AFTER all structural
+// patches (logo, entry, HTML) have consumed the upstream Poké/Bonk anchors.
+// Order matters: replace the long brand first so "PokéBonk" cannot become
+// "宝可宝可". This is deliberately exhaustive — it also rewrites the upstream
+// legal page, the PokéBonk.com domain and the Pokémon/Pokédex terms, per the
+// requested full literal replacement. vendor/ sources stay pristine; only the
+// in-memory output copy is changed, so snapshot SHA-256 validation is intact.
+export function patchAllBrandMentions(source:string) {
+  return source.replaceAll('PokéBonk',brandName).replaceAll('Poké',brandName).replaceAll('Bonk',brandName);
+}

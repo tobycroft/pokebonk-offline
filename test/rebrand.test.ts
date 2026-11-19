@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {brandName,patchMenuBranding,patchRemoveVersionBadge,patchRemoveLogout,patchRemoveMenuButtons,patchRemoveTopButtons,patchRemoveSeasonPanel,patchRemoveRankingTile,patchRemoveClanTile,patchRemoveEventCard,patchRemoveTrainerMailButtons,patchHideTrainerName,patchEntryBranding,patchHtmlBranding} from '../scripts/rebrand.ts';
+import {brandName,patchMenuBranding,patchRemoveVersionBadge,patchRemoveLogout,patchRemoveMenuButtons,patchRemoveTopButtons,patchRemoveSeasonPanel,patchRemoveRankingTile,patchRemoveClanTile,patchRemoveEventCard,patchRemoveTrainerMailButtons,patchHideTrainerName,patchEntryBranding,patchHtmlBranding,patchAllBrandMentions} from '../scripts/rebrand.ts';
 
 const menus=`
 function j5(e=\`normal\`){let t=e===\`hero\`;return Z(\`div\`,{class:\`logo\`},Z(\`div\`,{class:\`logo-word\`},\`Poké\`,Z(\`span\`,{class:\`logo-bonk\`},...t?[...\`Bonk\`].map((e,t)=>e):[\`Bonk\`]),Z(\`small\`,{class:\`logo-com\`},\`.com\`),t?Z(\`b\`,{class:\`logo-glint\`},\`PokéBonk\`):null))}
@@ -224,4 +224,11 @@ test('page titles and HTML branding use the Chinese name',()=>{
   assert.equal(patchEntryBranding('title:`PokéBonk · Survivor 3D`'),'title:`'+brandName+' · Survivor 3D`');
   assert.equal(patchHtmlBranding('<title>PokéBonk · demo</title>'),'<title>'+brandName+' · demo</title>');
   assert.throws(()=>patchHtmlBranding('<title>demo</title>'),/no brand in HTML/);
+});
+
+test('final brand pass replaces every literal form without doubling',()=>{
+  assert.equal(patchAllBrandMentions('PokéBonk es Pokémon, Pokédex y Bonk en PokéBonk.com'),'宝可 es 宝可mon, 宝可dex y 宝可 en 宝可.com');
+  assert.equal(patchAllBrandMentions('<title>Aviso · PokéBonk</title><meta content="PokéBonk">'),'<title>Aviso · 宝可</title><meta content="宝可">');
+  assert.doesNotMatch(patchAllBrandMentions('PokéBonk Pokémon Bonk Pokédex'),/Poké|Bonk/);
+  assert.equal(patchAllBrandMentions('宝可 已是中文'),'宝可 已是中文');
 });
