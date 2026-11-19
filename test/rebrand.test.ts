@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {brandName,patchMenuBranding,patchRemoveVersionBadge,patchRemoveLogout,patchRemoveMenuButtons,patchRemoveTopButtons,patchRemoveSeasonPanel,patchRemoveRankingTile,patchRemoveClanTile,patchRemoveEventCard,patchRemoveTrainerMailButtons,patchHideTrainerName,patchEntryBranding,patchHtmlBranding,patchAllBrandMentions} from '../scripts/rebrand.ts';
+import {brandName,patchMenuBranding,patchRemoveVersionBadge,patchRemoveLogout,patchRemoveMenuButtons,patchRemoveTopButtons,patchRemoveSeasonPanel,patchRemoveRankingTile,patchRemoveClanTile,patchRemoveEventCard,patchRemoveTrainerMailButtons,patchHideTrainerName,patchEntryBranding,patchHtmlBranding,patchRemoveXDefaultHreflang,patchAllBrandMentions} from '../scripts/rebrand.ts';
 
 const menus=`
 function j5(e=\`normal\`){let t=e===\`hero\`;return Z(\`div\`,{class:\`logo\`},Z(\`div\`,{class:\`logo-word\`},\`Poké\`,Z(\`span\`,{class:\`logo-bonk\`},...t?[...\`Bonk\`].map((e,t)=>e):[\`Bonk\`]),Z(\`small\`,{class:\`logo-com\`},\`.com\`),t?Z(\`b\`,{class:\`logo-glint\`},\`PokéBonk\`):null))}
@@ -239,4 +239,23 @@ test('final pass rewrites boot handshake events on both dispatch and listen side
   assert.match(patched,/baoke:boot-failed/);
   assert.match(patched,/baoke:modules-ready/);
   assert.doesNotMatch(patched,/pokebonk:/);
+});
+
+const seoLinks=`<link rel="canonical" href="https://pokebonk.com/" />
+    <link rel="alternate" hreflang="es" href="https://pokebonk.com/?lang=es" />
+    <link rel="alternate" hreflang="x-default" href="https://pokebonk.com/" />
+    <meta property="og:type" content="website" />`;
+
+test('x-default alternate link is removed while other SEO links stay',()=>{
+  const patched=patchRemoveXDefaultHreflang(seoLinks);
+  assert.doesNotMatch(patched,/x-default/);
+  assert.equal((patched.match(/<link/g)??[]).length,2);
+  assert.match(patched,/hreflang="es"/);
+  assert.match(patched,/rel="canonical"/);
+  assert.match(patched,/<meta property="og:type"/);
+});
+
+test('unexpected x-default link structure fails closed',()=>{
+  assert.throws(()=>patchRemoveXDefaultHreflang(seoLinks.replace('hreflang="x-default"','hreflang="default"')),/x-default hreflang link/);
+  assert.throws(()=>patchRemoveXDefaultHreflang('<meta name="x" />'),/x-default hreflang link/);
 });

@@ -318,6 +318,16 @@ export function patchRemoveVersionBadge(source:string) {
 export function patchEntryBranding(source:string) { return replaceBrand(source,'entry module'); }
 export function patchHtmlBranding(source:string) { return replaceBrand(source,'HTML'); }
 
+// The upstream SEO block ends with an x-default alternate link pointing at the
+// original domain. The offline build has no canonical multilingual landing page,
+// so drop only that link and keep the per-language alternates.
+export function patchRemoveXDefaultHreflang(source:string) {
+  const pattern=/[ \t]*<link\b[^>]*[ \t]hreflang=["']x-default["'][^>]*>[ \t]*(?:\r?\n)?/g;
+  const matches=source.match(pattern);
+  if(matches?.length!==1)throw new Error(`Unsupported upstream: x-default hreflang link: expected one match, got ${matches?.length??0}`);
+  return source.replace(pattern,'');
+}
+
 // Final pass over every generated text asset. Apply only AFTER all structural
 // patches (logo, entry, HTML) have consumed the upstream Poké/Bonk anchors.
 // Order matters: replace the long brand first so "PokéBonk" cannot become
