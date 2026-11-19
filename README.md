@@ -1,6 +1,6 @@
-# Baoke Offline
+# 宝可 Offline
 
-Unofficial, fully bundled [Baoke](https://pokebonk.com/) unlock-all apps for Electron desktop and Android. All game resources ship inside each package, saves stay local, and the game runs without an account or internet connection. There is no PWA, service worker, or Pages deployment.
+Unofficial, fully bundled [宝可](https://pokebonk.com/) unlock-all apps for Electron desktop and Android. All game resources ship inside each package, saves stay local, and the game runs without an account or internet connection. There is no PWA, service worker, or Pages deployment.
 
 ## Download and play
 
@@ -26,9 +26,9 @@ These builds support macOS 13 or later. They are ad-hoc signed, with no Apple De
 
 1. Open Apple menu > **About This Mac** ([Apple's chip identification guide](https://support.apple.com/en-us/116943)). Choose the `darwin-arm64` ZIP for an Apple Silicon chip, or `darwin-x64` for an Intel processor. Download it from this repository's [Releases](https://github.com/VdustR/pokebonk-offline/releases/latest).
 2. Check the ZIP against `SHA256SUMS.txt` from the same Release. In Terminal, run `shasum -a 256` followed by a space, drag the ZIP into the window, and press Return. Compare both the filename and hash with the checksum file.
-3. Double-click the ZIP in Finder. Inside the extracted `Baoke Offline-darwin-…` folder, drag **Baoke Offline.app** to **Applications**. Open that copy once. [Apple's app installation guide](https://support.apple.com/guide/mac-help/install-and-uninstall-other-apps-mh35835/mac) explains installing downloaded apps.
+3. Double-click the ZIP in Finder. Inside the extracted `宝可 Offline-darwin-…` folder, drag **宝可 Offline.app** to **Applications**. Open that copy once. [Apple's app installation guide](https://support.apple.com/guide/mac-help/install-and-uninstall-other-apps-mh35835/mac) explains installing downloaded apps.
 4. If macOS reports that the developer cannot be verified or Apple cannot check for malicious software, dismiss that dialog. Proceed only if you trust this download and its integrity check passed.
-5. Open Apple menu > **System Settings > Privacy & Security**, then scroll to **Security**. Find the blocked **Baoke Offline** entry and select **Open Anyway**. Some macOS versions show **Open** before that confirmation. The exception is for this app. See [Apple's first-launch instructions](https://support.apple.com/en-us/102445).
+5. Open Apple menu > **System Settings > Privacy & Security**, then scroll to **Security**. Find the blocked **宝可 Offline** entry and select **Open Anyway**. Some macOS versions show **Open** before that confirmation. The exception is for this app. See [Apple's first-launch instructions](https://support.apple.com/en-us/102445).
 6. Authenticate if prompted, then confirm **Open** when macOS asks again. Future launches of the approved copy normally work from Applications. If the button is missing, try opening the app again and return to Settings: Apple says the approval is available for roughly an hour after the attempt. [Apple's exception guide](https://support.apple.com/guide/mac-help/mh40617/mac) describes the timing and authentication.
 
 A warning that the app **will damage your computer**, was moved to Trash as malware, or **is damaged** needs investigation; do not treat it as the ordinary unidentified-developer prompt. Re-download from Releases and verify the checksum for a damaged download; report a persistent failure. Managed Macs may require your administrator's approval. [Apple distinguishes these alerts](https://support.apple.com/en-us/102445).
@@ -97,7 +97,7 @@ Android signing uses the existing local keystore and its established secret prov
 
 ## Attribution
 
-Builder code uses the included AGPL-3.0 license. Baoke's game code and assets are stored as a pristine, versioned snapshot, retain their original rights, and are not covered by the builder license. The upstream legal page and original credits remain included; see [vendored upstream notices](vendor/README.md).
+Builder code uses the included AGPL-3.0 license. 宝可's game code and assets are stored as a pristine, versioned snapshot, retain their original rights, and are not covered by the builder license. The upstream legal page and original credits remain included; see [vendored upstream notices](vendor/README.md).
 
 Credit goes to Charcher and the original contributors. Pokémon names and assets belong to their respective owners; the game's credits and legal page remain included. This is an unofficial, noncommercial personal build with no affiliation or endorsement.
 

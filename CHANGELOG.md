@@ -11,20 +11,20 @@
 ### Patch Changes
 
 - Build, validate and publish native releases locally. Keep Actions limited to upstream update reporting, preserve Android signing compatibility, and bound investigation of unreproduced historical failures.
-- Update the reviewed offline snapshot to Baoke 0.9.24, including upstream's fixed Swinub experience rewards.
+- Update the reviewed offline snapshot to 宝可 0.9.24, including upstream's fixed Swinub experience rewards.
 
 ## 0.0.25
 
 ### Patch Changes
 
-- Update the reviewed offline game to Baoke 0.9.22. Unlock the five Stellar cosmetic sets and include their artwork, animated models, and the new MP3 music fallback.
+- Update the reviewed offline game to 宝可 0.9.22. Unlock the five Stellar cosmetic sets and include their artwork, animated models, and the new MP3 music fallback.
 - Update the open upstream tracker in place and create a new issue when a different build arrives after closure.
 
 ## 0.0.24
 
 ### Patch Changes
 
-- Update the reviewed offline game to Baoke 0.9.19, including the new Abra, Gastly, and Pikachu treasure backgrounds and all twelve PNGs required by the animated treasure frames.
+- Update the reviewed offline game to 宝可 0.9.19, including the new Abra, Gastly, and Pikachu treasure backgrounds and all twelve PNGs required by the animated treasure frames.
 
 ## 0.0.23
 

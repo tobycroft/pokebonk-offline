@@ -17,7 +17,7 @@ android {
         versionName = generatedVersionName.get()
     }
 
-    defaultConfig { resValue("string", "app_name", "Baoke Offline") }
+    defaultConfig { resValue("string", "app_name", "宝可 Offline") }
 
     buildTypes {
         release {
@@ -47,7 +47,7 @@ android {
         warningsAsErrors = true
         // Keep CI deterministic on the latest stable, mutually supported Android toolchain.
         // The resource checks are false positives: adaptive icons need v26 XML, while the
-        // generated official logo is staged before Gradle resource processing. PokéBonk
+        // generated official logo is staged before Gradle resource processing. 宝可
         // stays landscape while respecting the user's normal or reverse landscape preference.
         disable += setOf(
             "AndroidGradlePluginVersion",

@@ -1,6 +1,6 @@
 # Release versions and provenance
 
-Release titles show both independently managed versions: **Baoke 0.8.34 · Offline 0.0.1**. The upstream version describes the downloaded game; the offline version describes this builder and its native shells. Changesets manages the private builder package without publishing to npm.
+Release titles show both independently managed versions: **宝可 0.8.34 · Offline 0.0.1**. The upstream version describes the downloaded game; the offline version describes this builder and its native shells. Changesets manages the private builder package without publishing to npm.
 
 | Change | Result |
 | --- | --- |

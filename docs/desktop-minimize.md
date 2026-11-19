@@ -8,7 +8,7 @@ Prepare the game and Electron using the README's development commands, then on L
 
 ```sh
 CI=1 bash e2e/with-linux-desktop.sh node e2e/minimize-game.ts
-CI=1 bash e2e/with-linux-desktop.sh node e2e/minimize-game.ts '/path/to/Baoke Offline'
+CI=1 bash e2e/with-linux-desktop.sh node e2e/minimize-game.ts '/path/to/宝可 Offline'
 ```
 
 The optional executable must contain the matching prepared game. The probe uses fresh temporary user data for each trial, starts a real run, waits for play, releases capture through the game's existing input method, then reacquires it through a trusted `w` key. This isolates the lock-age guard from the separate initial transition and resume guards. An actual pointer-lock acquisition event triggers native `BrowserWindow.minimize()` in the immediate case; the stable case waits for the input's acquisition age. No synthetic OS events or forced pause are used.

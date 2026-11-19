@@ -5,7 +5,7 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 if(process.platform!=='darwin')throw new Error('This interactive acceptance procedure requires macOS.');
 const temp=await mkdtemp(path.join(os.tmpdir(),'pokebonk-native-acceptance-'));
-await writeFile(path.join(temp,'index.html'),`<h1>PokéBonk native window acceptance</h1><button>Activate</button><script>localStorage.setItem('saved-progress','retained');addEventListener('beforeunload',event=>{event.preventDefault();event.returnValue='';});</script>`);
+await writeFile(path.join(temp,'index.html'),`<h1>宝可 native window acceptance</h1><button>Activate</button><script>localStorage.setItem('saved-progress','retained');addEventListener('beforeunload',event=>{event.preventDefault();event.returnValue='';});</script>`);
 const app=await electron.launch({args:['dist/desktop/main.js'],env:{...process.env,POKEBONK_GAME_DIR:temp,POKEBONK_USER_DATA_DIR:path.join(temp,'profile')}}).catch(async error=>{await rm(temp,{recursive:true,force:true});throw error;});
 app.on('window',page=>page.on('dialog',()=>{}));
 try {

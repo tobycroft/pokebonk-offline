@@ -13,7 +13,7 @@ const info=parseProvenance({upstreamVersion:'0.8.34',offlineVersion:'0.0.1',upst
 const published={draft:false,body:releaseMarker(info)};
 
 test('readable release identity retains exact build while ignoring unrelated commit changes',()=>{
-  assert.equal(info.title,'Baoke 0.8.34 · Offline 0.0.1');
+  assert.equal(info.title,'宝可 0.8.34 · Offline 0.0.1');
   assert.equal(info.tag,'upstream-v0.8.34-offline-v0.0.1-build-current');
   assert.equal(releaseRequired(published,{...info,builder:'c'.repeat(40)}),false);
   for(const identity of [releaseIdentity('0.8.35','0.0.1','next'),releaseIdentity('0.8.34','0.0.2','current'),releaseIdentity('0.8.34','0.0.1','hotfix')])assert.notEqual(identity.tag,info.tag);

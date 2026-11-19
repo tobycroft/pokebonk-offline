@@ -13,4 +13,4 @@ export function createStaticServer(directory=root,mount='/') {return http.create
   const data=await readFile(file);res.writeHead(200,{'Content-Type':mime[path.extname(file)]??'application/octet-stream','Cache-Control':'no-cache'});res.end(data);
  }catch{res.writeHead(404);res.end('Not found');}
 });}
-if(process.argv[1]&&import.meta.url===new URL('file://'+path.resolve(process.argv[1])).href)createStaticServer().listen(Number(process.env['PORT']??8098),'127.0.0.1',()=>console.log('Baoke SPA ready; all saves are browser-local.'));
+if(process.argv[1]&&import.meta.url===new URL('file://'+path.resolve(process.argv[1])).href)createStaticServer().listen(Number(process.env['PORT']??8098),'127.0.0.1',()=>console.log('宝可 SPA ready; all saves are browser-local.'));

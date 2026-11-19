@@ -9,9 +9,9 @@ function J5(e,t=!1){return Z(\`div\`,{class:\`mm-legal\`},Z(\`p\`,{},c(\`PokéBo
 
 test('menu logo becomes the display brand while the footer content is removed',()=>{
   const patched=patchMenuBranding(menus);
-  assert.match(patched,/"Bao"/);
-  assert.equal((patched.match(/"ke"/g)??[]).length,2);
-  assert.match(patched,/"Baoke"/);
+  assert.match(patched,/"宝"/);
+  assert.equal((patched.match(/"可"/g)??[]).length,2);
+  assert.match(patched,/"宝可"/);
   assert.doesNotMatch(patched,/`Poké`/);
   assert.doesNotMatch(patched,/`Bonk`/);
   assert.doesNotMatch(patched,/`\.com`/);

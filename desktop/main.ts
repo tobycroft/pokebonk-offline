@@ -250,7 +250,7 @@ function createWindow() {
       buttons: ["Keep Playing", "Close Game"],
       defaultId: 0,
       cancelId: 0,
-      title: "Close Baoke?",
+      title: "Close 宝可?",
       message: "Close the current game?",
       detail: "The current run will end without being completed. Previously saved progress and settings will be kept.",
       noLink: true,

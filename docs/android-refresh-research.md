@@ -9,9 +9,9 @@ performed.**
 - Host: macOS, arm64; Node.js 26.13.0 and the repository's Acorn dependency.
 - Android tools: SDK Build Tools 36.0.0 (`aapt`, `apksigner`, `dexdump`);
   API 35 stubs inspected with `javap`.
-- Game: vendored Baoke 0.9.13, build `mw41iu0i`, at the
+- Game: vendored 宝可 0.9.13, build `mw41iu0i`, at the
   [reviewed Offline 0.0.22 source](https://github.com/VdustR/pokebonk-offline/commit/bbee0c3e58e0dd3628e5f711a5e7f5f64dcd85ea).
-- Official artifact: `Baoke-1.0.1-android.apk` from the
+- Official artifact: `宝可-1.0.1-android.apk` from the
   [official app release](https://github.com/CharcherGit/pokebonk-app/releases/tag/v1.4.0).
   APK version 1.0.1 is the wrapper version, not the game version.
 - No ADB device was connected. No emulator was started, APK installed, or

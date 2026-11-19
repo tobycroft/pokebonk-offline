@@ -27,7 +27,7 @@ Observed 2026-10-25 (Asia/Taipei), macOS Apple Silicon, Node 26.12.1, Electron 4
 - Original-policy control after the fix: request denied again.
 - Same-origin child frame, foreign origin, geolocation and notification checks remain denied.
 
-The collected Baoke 0.8.47 build `mvnpa0xv` also passed the forest lock/camera/Escape/resume/map assertions and all five gameplay scenarios locally. An earlier run did not acquire a lock; focus contention was not ruled out, and the observation alone does not establish its cause. The automation explicitly establishes document focus before testing.
+The collected 宝可 0.8.47 build `mvnpa0xv` also passed the forest lock/camera/Escape/resume/map assertions and all five gameplay scenarios locally. An earlier run did not acquire a lock; focus contention was not ruled out, and the observation alone does not establish its cause. The automation explicitly establishes document focus before testing.
 
 This establishes that the deny-all permission policy prevents native pointer lock in this environment. It does not establish every upstream gameplay transition or physical mouse feel. Recheck this premise when Electron/Chromium, the permission handlers, custom origin, platform or focus/gesture sequence changes, or when contradictory evidence appears.
 
