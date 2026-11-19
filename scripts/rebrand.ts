@@ -339,8 +339,17 @@ export function patchRemoveXDefaultHreflang(source:string) {
 // listened for by both the upstream index.html recovery path and our e2e
 // probes. Both ends must use the same names, so rewrite them here on the
 // generated copy (vendor sources stay pristine).
+// Real upstream domains and repository URLs must stay resolvable. Protect them
+// (including the regex-escaped dot form used by the origin gate) before the
+// generic pass; everything else becomes the local `baoke` namespace.
+const upstreamReference=/pokebonk\\?\.com|pokebonk-(?:app|offline)/g;
+
 export function patchAllBrandMentions(source:string) {
-  return source.replaceAll('PokéBonk',brandName).replaceAll('Poké',brandName).replaceAll('Bonk',brandName)
+  const preserved:string[]=[];
+  let patched=source.replaceAll('PokéBonk',brandName).replaceAll('Poké',brandName).replaceAll('Bonk',brandName)
     .replaceAll('pokebonk:modules-ready','baoke:modules-ready')
     .replaceAll('pokebonk:boot-failed','baoke:boot-failed');
+  patched=patched.replace(upstreamReference,value=>`@@BAOKE_REF_${preserved.push(value)-1}@@`);
+  patched=patched.replaceAll('pokebonk','baoke');
+  return patched.replace(/@@BAOKE_REF_(\d+)@@/g,(_,index)=>preserved[Number(index)]??'');
 }

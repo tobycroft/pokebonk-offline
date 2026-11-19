@@ -231,6 +231,7 @@ test('final brand pass replaces every literal form without doubling',()=>{
   assert.equal(patchAllBrandMentions('<title>Aviso · PokéBonk</title><meta content="PokéBonk">'),'<title>Aviso · 宝可</title><meta content="宝可">');
   assert.doesNotMatch(patchAllBrandMentions('PokéBonk Pokémon Bonk Pokédex'),/Poké|Bonk/);
   assert.equal(patchAllBrandMentions('宝可 已是中文'),'宝可 已是中文');
+  assert.equal(patchAllBrandMentions('pokebonk.lang pokebonk-build'),'baoke.lang baoke-build');
 });
 
 test('final pass rewrites boot handshake events on both dispatch and listen sides',()=>{
@@ -258,4 +259,26 @@ test('x-default alternate link is removed while other SEO links stay',()=>{
 test('unexpected x-default link structure fails closed',()=>{
   assert.throws(()=>patchRemoveXDefaultHreflang(seoLinks.replace('hreflang="x-default"','hreflang="default"')),/x-default hreflang link/);
   assert.throws(()=>patchRemoveXDefaultHreflang('<meta name="x" />'),/x-default hreflang link/);
+});
+
+test('internal pokebonk keys become baoke while real upstream links stay intact',()=>{
+  const source='<meta name="pokebonk-build" content="mwc3y990">'
+    +`localStorage.getItem('pokebonk.lang');localStorage.getItem('pokebonk.theme');`
+    +'window.pokebonkDesktop;console.error(`[pokebonk] boot`);'
+    +'href="https://pokebonk.com/" contacto@pokebonk.com'
+    +'https://github.com/CharcherGit/pokebonk-app/releases/download/'
+    +'/(^|\\.)pokebonk\\.com$/';
+  const patched=patchAllBrandMentions(source);
+  assert.match(patched,/name="baoke-build"/);
+  assert.match(patched,/getItem\('baoke.lang'\)/);
+  assert.match(patched,/getItem\('baoke.theme'\)/);
+  assert.match(patched,/window\.baokeDesktop/);
+  assert.match(patched,/\[baoke\] boot/);
+  // Real domains, the contact email, the APK repository and the escaped-dot
+  // origin regex are preserved verbatim.
+  assert.match(patched,/href="https:\/\/pokebonk.com\/"/);
+  assert.match(patched,/contacto@pokebonk.com/);
+  assert.match(patched,/CharcherGit\/pokebonk-app\/releases\/download\//);
+  assert.match(patched,/pokebonk\\\.com\$/);
+  assert.doesNotMatch(patched,/@@BAOKE_REF_/);
 });

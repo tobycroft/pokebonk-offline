@@ -46,7 +46,7 @@ const entryKey=one([...files.keys()].filter(key=>key.endsWith('.js')&&html.inclu
 files.set(entryKey,Buffer.from(patchEntryBranding(patchNativeOriginGate(contents(entryKey)))));
 const csp = "default-src 'self' blob: data:; script-src 'self' 'unsafe-inline'; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; connect-src 'self' blob:; frame-src 'none'; object-src 'none'";
 // Native packages serve all assets directly; there is no PWA or service worker.
-const nativeHtml=patchRemoveXDefaultHreflang(patchHtmlBranding(html)).replace(/<link[^>]+rel=["']manifest["'][^>]*>/g,'').replace('</head>', `<meta http-equiv="Content-Security-Policy" content="${csp}"><script>if(!localStorage.getItem('pokebonk.lang'))localStorage.setItem('pokebonk.lang','zh');</script></head>`);
+const nativeHtml=patchRemoveXDefaultHreflang(patchHtmlBranding(html)).replace(/<link[^>]+rel=["']manifest["'][^>]*>/g,'').replace('</head>', `<meta http-equiv="Content-Security-Policy" content="${csp}"><script>if(!localStorage.getItem('baoke.lang'))localStorage.setItem('baoke.lang','zh');</script></head>`);
 files.delete('manifest.webmanifest');
 files.set('index.html',Buffer.from(nativeHtml));
 for(const [key,data] of files)if(key.endsWith('.html'))files.set(key,Buffer.from(data.toString().replace(/((?:src|href)=["'])\/(?!\/)/g,'$1./').replace(/href=(["'])\.\/legal\1/g,'href=$1./legal.html$1')));

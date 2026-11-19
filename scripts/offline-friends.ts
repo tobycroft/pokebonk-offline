@@ -29,6 +29,6 @@ export function patchOfflineFriends(source:string):string {
   const icon=nameOf(one(nodesOf(guest,'CallExpression',call=>literal(call.arguments[0])==='friends'&&literal(call.arguments[1])===96),'friends icon helper').callee);
   const title=guest.arguments[2];
   if(!title)throw new Error('Unsupported upstream: friends title');
-  const code=`if(${app}.backend.kind==='local'){const messages=new Map(Object.entries(${JSON.stringify(copy)}));const language=localStorage.getItem('pokebonk.lang')||'es';const message=messages.get(language)||messages.get('en');${screen}(${app},'fr',${source.slice(title.start,title.end)},'',${back},[],${dom}('div',{class:'cl-hub'},${dom}('div',{class:'panel cl-guest'},${icon}('friends',96),${dom}('h2',{},message[0]),${dom}('p',{},message[1]))));return;}`;
+  const code=`if(${app}.backend.kind==='local'){const messages=new Map(Object.entries(${JSON.stringify(copy)}));const language=localStorage.getItem('baoke.lang')||'es';const message=messages.get(language)||messages.get('en');${screen}(${app},'fr',${source.slice(title.start,title.end)},'',${back},[],${dom}('div',{class:'cl-hub'},${dom}('div',{class:'panel cl-guest'},${icon}('friends',96),${dom}('h2',{},message[0]),${dom}('p',{},message[1]))));return;}`;
   return edits(source,[{start:route.body.start+1,end:route.body.start+1,text:code}]);
 }

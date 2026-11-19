@@ -23,5 +23,5 @@ export function patchOfflineStorageError(source:string):string {
     const call=one(nodesOf(method,'CallExpression',node=>node.arguments.length===1&&literal(node.arguments[0])===message),'startup failure message');
     return {start:call.start,end:call.end,text:`(localStorageMessages?localStorageMessages[${index}]:${source.slice(call.start,call.end)})`};
   });
-  return edits(source,[{start:method.value.body.start+1,end:method.value.body.start+1,text:`const localStorageMessages=this.backend.kind==='local'?(()=>{const messages=new Map(Object.entries(${JSON.stringify(copy)}));return messages.get(localStorage.getItem('pokebonk.lang')||'es')||messages.get('en');})():null;`},...replacements]);
+  return edits(source,[{start:method.value.body.start+1,end:method.value.body.start+1,text:`const localStorageMessages=this.backend.kind==='local'?(()=>{const messages=new Map(Object.entries(${JSON.stringify(copy)}));return messages.get(localStorage.getItem('baoke.lang')||'es')||messages.get('en');})():null;`},...replacements]);
 }

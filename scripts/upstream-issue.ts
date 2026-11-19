@@ -5,7 +5,14 @@ import {upstreamChanged} from './upstream-plan.ts';
 import type {UpstreamIdentity} from './upstream-plan.ts';
 export type VersionIssue={number:number;body:string;state:'open'|'closed';author:string;pullRequest:boolean};
 export type IssueStore={get:(number:number)=>VersionIssue;list:()=>VersionIssue[];create:(title:string,body:string)=>VersionIssue;update:(number:number,body:string,close:boolean)=>VersionIssue};
-const start='<!-- pokebonk-upstream-update:start -->',end='<!-- pokebonk-upstream-update:end -->';
+const start='<!-- baoke-upstream-update:start -->',end='<!-- baoke-upstream-update:end -->';
+// Trackers created before the rename use the old marker names; recognize both
+// when locating an existing tracker, but always write the new names.
+const legacyStart='<!-- pokebonk-upstream-update:start -->',legacyEnd='<!-- pokebonk-upstream-update:end -->';
+const markerName=(body:string,value:'start'|'end')=>{
+  const current=value==='start'?start:end,legacy=value==='start'?legacyStart:legacyEnd;
+  return body.includes(current)?current:legacy;
+};
 function repositoryName(value:unknown) {
   const name=text(value,'GitHub repository');
   if(!/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\/[a-z0-9_.-]+$/i.test(name)||['.','..'].includes(name.split('/')[1]??''))throw new Error('Invalid GitHub repository');
@@ -16,10 +23,11 @@ function managedBody(repository:string,current:UpstreamIdentity,remote:UpstreamI
   return `${start}\n## Upstream version status\n\n${changed?'Update available.':'Up to date.'}\n\nAccepted snapshot: **${current.upstreamVersion}** (\`${current.upstreamBuild}\`).\nDetected upstream: **${remote.upstreamVersion}** (\`${remote.upstreamBuild}\`).\n\n[Official game](https://pokebonk.com/) · [Resource review](https://github.com/${repository}/blob/main/docs/resource-completeness.md)\n\n${changed?'Review the upstream resources, capture the verified snapshot, and run the local release command before publication.':'The accepted snapshot matches the official build.'}\nThis check reports versions; it does not acquire, promote, or publish game files.\n${end}`;
 }
 function managedRange(body:string) {
-  if(body.split(start).length!==2||body.split(end).length!==2)throw new Error('Malformed upstream update tracker markers');
-  const from=body.indexOf(start),to=body.indexOf(end);
+  const fromMarker=markerName(body,'start'),toMarker=markerName(body,'end');
+  if(body.split(fromMarker).length!==2||body.split(toMarker).length!==2)throw new Error('Malformed upstream update tracker markers');
+  const from=body.indexOf(fromMarker),to=body.indexOf(toMarker);
   if(to<from)throw new Error('Malformed upstream update tracker marker order');
-  return {from,to:to+end.length};
+  return {from,to:to+toMarker.length};
 }
 function reportedIdentity(body:string):UpstreamIdentity {
   const match=/^Detected upstream: \*\*([\d.]+)\*\* \(`([\w-]+)`\)\.\r?$/m.exec(body);
@@ -30,7 +38,7 @@ export function reconcileVersionIssue(repository:string,accepted:UpstreamIdentit
   const repo=repositoryName(repository),current=identity(accepted),remote=identity(detected);
   const changed=upstreamChanged(current,remote),owner=repo.split('/')[0]?.toLowerCase();
   const owned=(issue:VersionIssue)=>!issue.pullRequest&&(issue.author.toLowerCase()===owner||issue.author==='github-actions[bot]')
-    &&(issue.body.includes(start)||issue.body.includes(end));
+    &&[start,end,legacyStart,legacyEnd].some(marker=>issue.body.includes(marker));
   const trackers=store.list().filter(owned).sort((a,b)=>b.number-a.number);
   const latest=trackers[0];
   if(trackers.slice(1).some(issue=>issue.state==='open'))throw new Error('Ambiguous upstream update trackers; close older trackers before retrying');

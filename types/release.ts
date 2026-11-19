@@ -23,12 +23,13 @@ export function parseProvenance(value:unknown) {
   return {...identity,builder,sourceDigest,variant:'unlock-all' as const};
 }
 export type ReleaseProvenance=ReturnType<typeof parseProvenance>;
-export function releaseMarker(info:ReleaseProvenance) {return `<!-- pokebonk-release:${JSON.stringify(info)} -->`;}
+export function releaseMarker(info:ReleaseProvenance) {return `<!-- baoke-release:${JSON.stringify(info)} -->`;}
 export function releaseRequired(existing:unknown,expected:ReleaseProvenance) {
   if(existing===undefined)return true;
   const release=record(existing,'GitHub release');
   if(typeof release['draft']!=='boolean')throw new Error('Invalid release draft state');
-  const marker=text(release['body'],'release notes').match(/<!-- pokebonk-release:(.*?) -->/);
+  // Accept both names so releases published before the marker rename stay verifiable.
+  const marker=text(release['body'],'release notes').match(/<!-- (?:baoke|pokebonk)-release:(.*?) -->/);
   if(!marker?.[1])throw new Error('Published identity has no build provenance');
   const info=parseProvenance(JSON.parse(marker[1]));
   if(info.tag!==expected.tag)throw new Error('Published release identity mismatch');

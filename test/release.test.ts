@@ -39,7 +39,7 @@ test('source fingerprint excludes docs and tests but tracks packaged tools, nati
 });
 test('release notes select current Changesets entry and preserve provenance',()=>{
   const notes=releaseNotes(info,'# App\n\n## 0.0.1\n\n### Patch Changes\n\n- Fix images.\n\n## 0.0.0\n\n- Old.\n');
-  assert.match(notes,/Fix images/);assert.doesNotMatch(notes,/Old\./);assert.match(notes,/Unlocked/);assert.match(notes,/pokebonk-release:/);
+  assert.match(notes,/Fix images/);assert.doesNotMatch(notes,/Old\./);assert.match(notes,/Unlocked/);assert.match(notes,/baoke-release:/);assert.doesNotMatch(notes,/pokebonk-release:/);
   assert.throws(()=>releaseNotes(info,'## 0.0.2\n- Future'),/Missing offline version/);
   assert.throws(()=>releaseNotes(info,'## 0.0.1\n\n## 0.0.0\n- Old'),/Empty offline changelog/);
 });

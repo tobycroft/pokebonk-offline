@@ -113,6 +113,24 @@ test('partial pagination and malformed API responses fail before any issue mutat
     assert.throws(()=>reconcileVersionIssue(repository,current,remote,store),fail==='second-page'?/403/:/GitHub/);
   }
 });
+test('new trackers use the baoke marker and legacy markers stay updatable',()=>{
+  const fresh=fixture();reconcileVersionIssue(repository,current,remote,fresh.store);
+  const body=fresh.issues[0]?.body??'';
+  assert.match(body,/<!-- baoke-upstream-update:start -->/);
+  assert.match(body,/<!-- baoke-upstream-update:end -->/);
+  assert.doesNotMatch(body,/pokebonk-upstream-update/);
+
+  // An issue created before the rename must still be recognized and rewritten
+  // in place with the new markers instead of spawning a duplicate tracker.
+  const legacy=fixture();
+  legacy.issues.push({number:1,body:'Header\n'+start+'\n## Upstream version status\n\nDetected upstream: **0.9.11** (`accepted`).\n'+end+'\nFooter',state:'open',author:'VdustR',pullRequest:false});
+  assert.deepEqual(reconcileVersionIssue(repository,current,remote,legacy.store),{action:'updated',issue:1});
+  const updated=legacy.issues[0]?.body??'';
+  assert.match(updated,/<!-- baoke-upstream-update:start -->/);
+  assert.match(updated,/<!-- baoke-upstream-update:end -->/);
+  assert.doesNotMatch(updated,/pokebonk-upstream-update/);
+  assert.match(updated,/^Header\n/);assert.match(updated,/\nFooter$/);
+});
 test('an inaccessible or replaced selected tracker never falls back to creation',()=>{
   const f=fixture();reconcileVersionIssue(repository,current,remote,f.store);
   assert.throws(()=>reconcileVersionIssue(repository,current,remote,{...f.store,get:()=>{throw Error('GitHub HTTP 404');}}),/404/);
