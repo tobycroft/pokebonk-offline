@@ -9,7 +9,7 @@ import {createSnapshotManifest,parseSnapshotManifest,readSnapshot,writeSnapshot,
 
 const files=(build='fixture')=>new Map([['index.html',Buffer.from(`<meta name="pokebonk-build" content="${build}">`)],['assets/1.png',Buffer.from('image bytes')]]);
 test('snapshot bytes round-trip and promotion binds the exact validated digest',async()=>{
-  const root=await mkdtemp(path.join(os.tmpdir(),'pokebonk-snapshot-'));
+  const root=await mkdtemp(path.join(os.tmpdir(),'baoke-snapshot-'));
   try {
     const source=path.join(root,'source'),destination=path.join(root,'destination');
     const manifest=await writeSnapshot(source,files(),'fixture','0.8.78');
@@ -34,7 +34,7 @@ test('malformed identities, duplicate paths and traversal reject before creating
   assert.throws(()=>createSnapshotManifest(files(),'bad\nidentity','0.8.78'));
 });
 test('symlinks and mismatched HTML cannot replace a valid snapshot',async()=>{
-  const root=await mkdtemp(path.join(os.tmpdir(),'pokebonk-snapshot-boundary-'));
+  const root=await mkdtemp(path.join(os.tmpdir(),'baoke-snapshot-boundary-'));
   try {
     const source=path.join(root,'source'),destination=path.join(root,'destination');
     await writeSnapshot(source,files(),'fixture','0.8.78');await writeSnapshot(destination,files(),'fixture','0.8.78');

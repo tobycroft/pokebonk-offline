@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import {stripTypeScriptTypes} from 'node:module';
 import {record,text} from '../types/data.ts';
 
-const temp=await mkdtemp(path.join(os.tmpdir(),'pokebonk-links-repro-'));
+const temp=await mkdtemp(path.join(os.tmpdir(),'baoke-links-repro-'));
 try {
   const original=execFileSync('git',['show','eecd77637707abbe759a06c3d226f05d03544aa4:desktop/main.ts'],{encoding:'utf8'});
   const baseline=path.join(temp,'baseline.mjs');

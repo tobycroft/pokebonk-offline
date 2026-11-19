@@ -4,7 +4,7 @@ import path from "node:path";
 import { Readable } from "node:stream";
 import { fileURLToPath } from "node:url";
 
-const APP_SCHEME = "pokebonk";
+const APP_SCHEME = "baoke";
 const APP_HOST = "game";
 const moduleDirectory = path.dirname(fileURLToPath(import.meta.url));
 const MIME_TYPES = new Map([
@@ -31,8 +31,8 @@ const MIME_TYPES = new Map([
   [".woff2", "font/woff2"],
 ]);
 
-if (!app.isPackaged && process.env['POKEBONK_REMOTE_DEBUGGING_PORT']) {
-  app.commandLine.appendSwitch("remote-debugging-port", process.env['POKEBONK_REMOTE_DEBUGGING_PORT']);
+if (!app.isPackaged && process.env['BAOKE_REMOTE_DEBUGGING_PORT']) {
+  app.commandLine.appendSwitch("remote-debugging-port", process.env['BAOKE_REMOTE_DEBUGGING_PORT']);
 }
 
 protocol.registerSchemesAsPrivileged([
@@ -50,8 +50,8 @@ protocol.registerSchemesAsPrivileged([
 ]);
 
 function getGameDirectory() {
-  if (!app.isPackaged && process.env['POKEBONK_GAME_DIR']) {
-    return path.resolve(process.env['POKEBONK_GAME_DIR']);
+  if (!app.isPackaged && process.env['BAOKE_GAME_DIR']) {
+    return path.resolve(process.env['BAOKE_GAME_DIR']);
   }
   if (app.isPackaged) {
     return path.join(process.resourcesPath, "game");
@@ -268,7 +268,7 @@ function createWindow() {
   return window;
 }
 
-if (process.env['POKEBONK_USER_DATA_DIR']) app.setPath("userData", path.resolve(process.env['POKEBONK_USER_DATA_DIR']));
+if (process.env['BAOKE_USER_DATA_DIR']) app.setPath("userData", path.resolve(process.env['BAOKE_USER_DATA_DIR']));
 
 void app.whenReady().then(() => {
   const gameDirectory = getGameDirectory();

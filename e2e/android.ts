@@ -7,7 +7,7 @@ import {checkGame} from './game-checks.ts';
 const serial=process.argv[2];
 if(!serial)throw new Error('Usage: node e2e/android.ts <adb serial>');
 const adb=(...args:string[])=>execFileSync('adb',['-s',serial,...args],{encoding:'utf8'}).trim();
-const packageName='dev.vdustr.pokebonk.offline';
+const packageName='dev.vdustr.baoke.offline';
 const meta=parseMetadata(JSON.parse(await readFile('build/game/offline-build.json','utf8')));
 adb('shell','am','force-stop',packageName);
 adb('shell','am','start','-W','-n',packageName+'/.MainActivity');

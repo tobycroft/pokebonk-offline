@@ -2,7 +2,7 @@ import type {Page} from 'playwright-core';
 
 // This function runs in the renderer; keep its dependencies inside the function.
 function captureSnapshot(eligibleOnly:boolean) {
-  const app=window.__pokebonkLocalApp,run=app?.run;
+  const app=window.__baokeLocalApp,run=app?.run;
   const read=(target:unknown,key:string):unknown=>typeof target==='object'&&target!==null?Reflect.get(target,key):null;
   const number=(value:unknown)=>typeof value==='number'&&Number.isFinite(value)?value:null;
   const input:unknown=read(app,'input'),from:unknown=read(run,'resumedFrom');

@@ -13,19 +13,19 @@ const [gameArg = 'build/game', outputArg = 'release', platform = process.platfor
 if ((platform!=='darwin'&&platform!=='win32'&&platform!=='linux') || (arch!=='arm64'&&arch!=='x64')) throw new Error('Unsupported target');
 const game = path.resolve(gameArg), output = path.resolve(outputArg);
 const meta = parseMetadata(JSON.parse(await readFile(path.join(game,'offline-build.json'),'utf8')));
-const temp = await mkdtemp(path.join(os.tmpdir(),'pokebonk-package-'));
+const temp = await mkdtemp(path.join(os.tmpdir(),'baoke-package-'));
 try {
   const appDirectory = path.join(temp,'app');
   await mkdir(appDirectory);
   await cp('dist/desktop/main.js',path.join(appDirectory,'main.mjs'));
   await cp('LICENSE',path.join(appDirectory,'LICENSE'));
-  await writeFile(path.join(appDirectory,'package.json'),JSON.stringify({name:'pokebonk-offline',productName:'宝可 Offline',version:meta.offlineVersion,type:'module',main:'main.mjs',author:'VdustR'}));
-  const iconBase=path.join(temp,'pokebonk');
+  await writeFile(path.join(appDirectory,'package.json'),JSON.stringify({name:'baoke-offline',productName:'宝可 Offline',version:meta.offlineVersion,type:'module',main:'main.mjs',author:'VdustR'}));
+  const iconBase=path.join(temp,'baoke');
   await createElectronIcons(game,iconBase);
   const packaged = one(await packager({dir:appDirectory,out:temp,name:'宝可 Offline',platform,arch,
     ...(platform==='linux'?{}:{icon:iconBase}),
-    ...(platform==='darwin'?{extendInfo:{CFBundleIconFile:'pokebonk.icns'}}:{}),
-    electronVersion:text(record(require('electron/package.json'))['version']),appBundleId:'dev.vdustr.pokebonk.offline',
+    ...(platform==='darwin'?{extendInfo:{CFBundleIconFile:'baoke.icns'}}:{}),
+    electronVersion:text(record(require('electron/package.json'))['version']),appBundleId:'dev.vdustr.baoke.offline',
     appVersion:meta.offlineVersion,asar:true,overwrite:true,prune:false}),'Electron package');
   const resources = platform === 'darwin' ? path.join(packaged,'宝可 Offline.app/Contents/Resources') : path.join(packaged,'resources');
   await cp(game,path.join(resources,'game'),{recursive:true});

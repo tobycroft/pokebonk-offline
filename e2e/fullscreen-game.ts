@@ -13,10 +13,10 @@ import {checkMinimizeInput} from './minimize-game.ts';
 const game=path.resolve(process.argv[2]??'build/game');
 const executablePath=process.argv[3];
 if(!executablePath)await checkRestoreInput();
-const userData=await mkdtemp(path.join(os.tmpdir(),'pokebonk-fullscreen-game-'));
+const userData=await mkdtemp(path.join(os.tmpdir(),'baoke-fullscreen-game-'));
 const args=executablePath?[]:['dist/desktop/main.js'];
 if(process.env['CI']&&process.platform==='linux')args.push('--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader');
-const app=await electron.launch({args,...(executablePath?{executablePath:path.resolve(executablePath)}:{}),env:{...process.env,POKEBONK_GAME_DIR:game,POKEBONK_USER_DATA_DIR:userData},timeout:120000}).catch(async error=>{await rm(userData,{recursive:true,force:true});throw error;});
+const app=await electron.launch({args,...(executablePath?{executablePath:path.resolve(executablePath)}:{}),env:{...process.env,BAOKE_GAME_DIR:game,BAOKE_USER_DATA_DIR:userData},timeout:120000}).catch(async error=>{await rm(userData,{recursive:true,force:true});throw error;});
 let page:Page|undefined;
 let stage='boot';
 let beforeMinimize:Awaited<ReturnType<typeof readGameCapture>>|undefined;
@@ -25,14 +25,14 @@ try {
   page=await app.firstWindow();
   page.on('pageerror',error=>startupErrors.push(error.message));
   await page.addInitScript(()=>{
-    Reflect.set(window,'__pokebonkSmokeBootState','pending');
-    addEventListener('pokebonk:modules-ready',()=>Reflect.set(window,'__pokebonkSmokeBootState','ready'));
-    addEventListener('pokebonk:boot-failed',()=>Reflect.set(window,'__pokebonkSmokeBootState','failed'));
+    Reflect.set(window,'__baokeSmokeBootState','pending');
+    addEventListener('pokebonk:modules-ready',()=>Reflect.set(window,'__baokeSmokeBootState','ready'));
+    addEventListener('pokebonk:boot-failed',()=>Reflect.set(window,'__baokeSmokeBootState','failed'));
   });
   // Install observers before navigation so an early boot refusal is observable.
   await page.reload();
-  await page.waitForFunction(()=>window.__pokebonkLocalApp?.meta?.profile?.localSandbox||Reflect.get(window,'__pokebonkSmokeBootState')!=='pending',null,{timeout:120000});
-  assert.equal(await page.evaluate(()=>!!window.__pokebonkLocalApp?.meta?.profile?.localSandbox),true,'Upstream entry completed without a local profile');
+  await page.waitForFunction(()=>window.__baokeLocalApp?.meta?.profile?.localSandbox||Reflect.get(window,'__baokeSmokeBootState')!=='pending',null,{timeout:120000});
+  assert.equal(await page.evaluate(()=>!!window.__baokeLocalApp?.meta?.profile?.localSandbox),true,'Upstream entry completed without a local profile');
   await focusNativeInput(app);
   await dismissMenuNotices(page);
   const toggle=page.locator('.fs-btn');
@@ -80,8 +80,8 @@ try {
   await row.locator('.switch:not(.on)').waitFor({timeout:5000});
   await app.evaluate(async({BrowserWindow})=>{const window=BrowserWindow.getAllWindows()[0];if(window?.isFullScreen())await new Promise<void>((resolve,reject)=>{window.once('leave-full-screen',()=>resolve());setTimeout(()=>reject(new Error('Settings exit transition timed out')),5000);});});
   await page.keyboard.press('Escape');
-  await page.evaluate(()=>window.__pokebonkLocalApp.startRun({species:4,biome:'forest',tier:0,boosts:[]}));
-  await page.waitForFunction(()=>(window.__pokebonkLocalApp.run?.time??0)>1,null,{timeout:90000});
+  await page.evaluate(()=>window.__baokeLocalApp.startRun({species:4,biome:'forest',tier:0,boosts:[]}));
+  await page.waitForFunction(()=>(window.__baokeLocalApp.run?.time??0)>1,null,{timeout:90000});
   stage='initial-input';
   await focusNativeInput(app);
   await page.keyboard.press('w');
@@ -95,15 +95,15 @@ try {
     if(!window?.isFocused()||!window.webContents.isFocused())throw new Error('Native input focus was lost before minimize');
     window.minimize();
   });
-  await page.waitForFunction(()=>document.pointerLockElement===null&&window.__pokebonkLocalApp.run?.state==='paused');
+  await page.waitForFunction(()=>document.pointerLockElement===null&&window.__baokeLocalApp.run?.state==='paused');
   stage='restore';
   await restoreNativeInput(app);
   await page.waitForFunction(()=>document.hasFocus());
-  assert.equal(await page.evaluate(()=>window.__pokebonkLocalApp.run?.state),'paused');
+  assert.equal(await page.evaluate(()=>window.__baokeLocalApp.run?.state),'paused');
   stage='resume-input';
-  await page.evaluate(()=>window.__pokebonkLocalApp.run?.resume());
+  await page.evaluate(()=>window.__baokeLocalApp.run?.resume());
   await page.keyboard.press('w');
-  await page.waitForFunction(()=>!!document.pointerLockElement&&window.__pokebonkLocalApp.run?.state==='play');
+  await page.waitForFunction(()=>!!document.pointerLockElement&&window.__baokeLocalApp.run?.state==='play');
   await writeFile('evidence/fullscreen-game.json',JSON.stringify({observedAt:new Date().toISOString(),executable:executablePath??'development shell',menuButtonEnteredAndExited:true,labelRestored:true,nativeFullscreen:true,settingsSwitchEnteredAndExited:true,minimizeReleasesAndPauses:true,restoreKeepsPaused:true,resumeReacquiresPointer:true},null,2));
   console.log('Actual game fullscreen menu button entered and exited successfully.');
 } catch(error) {
@@ -111,7 +111,7 @@ try {
     await mkdir('evidence',{recursive:true});
     await page.screenshot({path:'evidence/fullscreen-game-failure.png'}).catch(()=>{});
     const native=await app.evaluate(({BrowserWindow})=>{const window=BrowserWindow.getAllWindows()[0];return window?{minimized:window.isMinimized(),focused:window.isFocused(),contentsFocused:window.webContents.isFocused()}:null;}).catch(()=>null);
-    await writeFile('evidence/fullscreen-game-failure.json',JSON.stringify({error:String(error),stage,startupErrors,native,beforeMinimize,input:await readGameCapture(page).catch(()=>null),url:page.url(),text:await page.locator('body').innerText().catch(()=>''),boot:await page.evaluate(()=>Reflect.get(window,'__pokebonkSmokeBootState')).catch(()=>null)},null,2));
+    await writeFile('evidence/fullscreen-game-failure.json',JSON.stringify({error:String(error),stage,startupErrors,native,beforeMinimize,input:await readGameCapture(page).catch(()=>null),url:page.url(),text:await page.locator('body').innerText().catch(()=>''),boot:await page.evaluate(()=>Reflect.get(window,'__baokeSmokeBootState')).catch(()=>null)},null,2));
   }
   throw error;
 } finally {

@@ -1,3 +1,3 @@
--keepclassmembers class dev.vdustr.pokebonk.offline.MainActivity$SaveDownloadBridge {
+-keepclassmembers class dev.vdustr.baoke.offline.MainActivity$SaveDownloadBridge {
     @android.webkit.JavascriptInterface <methods>;
 }

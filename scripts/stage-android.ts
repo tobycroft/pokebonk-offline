@@ -8,4 +8,4 @@ await mkdir(target, { recursive: true });
 await cp(game, target, { recursive: true });
 const drawable='android/app/src/main/res/drawable-nodpi';
 await mkdir(drawable,{recursive:true});
-await cp(path.join(game,'icons/icon-512.png'),`${drawable}/pokebonk_logo.png`);
+await cp(path.join(game,'icons/icon-512.png'),`${drawable}/baoke_logo.png`);

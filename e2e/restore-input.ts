@@ -7,7 +7,7 @@ import {fileURLToPath} from 'node:url';
 import {focusNativeInput,restoreNativeInput} from './native-input-focus.ts';
 
 export async function checkRestoreInput() {
-const temporary=await mkdtemp(path.join(os.tmpdir(),'pokebonk-restore-input-'));
+const temporary=await mkdtemp(path.join(os.tmpdir(),'baoke-restore-input-'));
 const domOnly=process.env['RESTORE_CHECK_DOM_ONLY']==='1';
 await writeFile(path.join(temporary,'index.html'),`<canvas width="320" height="200"></canvas><script>
 addEventListener('keydown',async()=>{
@@ -18,7 +18,7 @@ addEventListener('keydown',async()=>{
 const args=['dist/desktop/main.js'];
 const binary=process.env['RESTORE_ELECTRON_BINARY'];
 if(process.env['CI']&&process.platform==='linux')args.push('--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader');
-const app=await electron.launch({args,...(binary?{executablePath:path.resolve(binary)}:{}),env:{...process.env,POKEBONK_GAME_DIR:temporary,POKEBONK_USER_DATA_DIR:path.join(temporary,'profile')},timeout:120000}).catch(async error=>{await rm(temporary,{recursive:true,force:true});throw error;});
+const app=await electron.launch({args,...(binary?{executablePath:path.resolve(binary)}:{}),env:{...process.env,BAOKE_GAME_DIR:temporary,BAOKE_USER_DATA_DIR:path.join(temporary,'profile')},timeout:120000}).catch(async error=>{await rm(temporary,{recursive:true,force:true});throw error;});
 const minimize=async()=>app.evaluate(async({BrowserWindow})=>{
   const window=BrowserWindow.getAllWindows()[0];
   if(!window)throw new Error('Missing native test window');

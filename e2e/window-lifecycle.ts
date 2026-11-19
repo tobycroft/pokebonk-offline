@@ -4,7 +4,7 @@ import path from 'node:path';
 import os from 'node:os';
 import assert from 'node:assert/strict';
 
-const temp=await mkdtemp(path.join(os.tmpdir(),'pokebonk-window-lifecycle-'));
+const temp=await mkdtemp(path.join(os.tmpdir(),'baoke-window-lifecycle-'));
 await writeFile(path.join(temp,'index.html'),`<button>Play</button><script>
 localStorage.setItem('saved-progress','retained');
 window.activeRun=true;window.closeRequests=0;
@@ -12,7 +12,7 @@ addEventListener('beforeunload',event=>{window.closeRequests++;if(window.activeR
 </script>`);
 const args=['dist/desktop/main.js'];
 if(process.env['CI']&&process.platform==='linux')args.push('--no-sandbox');
-const app=await electron.launch({args,env:{...process.env,POKEBONK_GAME_DIR:temp,POKEBONK_USER_DATA_DIR:path.join(temp,'profile')}}).catch(async error=>{await rm(temp,{recursive:true,force:true});throw error;});
+const app=await electron.launch({args,env:{...process.env,BAOKE_GAME_DIR:temp,BAOKE_USER_DATA_DIR:path.join(temp,'profile')}}).catch(async error=>{await rm(temp,{recursive:true,force:true});throw error;});
 try {
   const page=await app.firstWindow();
   // Electron owns this prompt; prevent Playwright's auto-dismiss race.
@@ -54,7 +54,7 @@ try {
   await app.evaluate(({app})=>app.emit('activate'));
   const next=await reopened;
   next.on('dialog',()=>{});
-  await next.waitForURL('pokebonk://game/index.html');
+  await next.waitForURL('baoke://game/index.html');
   await next.waitForLoadState('domcontentloaded');
   assert.equal(await next.evaluate(()=>localStorage.getItem('saved-progress')),'retained');
   await next.evaluate(()=>Reflect.set(window,'activeRun',false));

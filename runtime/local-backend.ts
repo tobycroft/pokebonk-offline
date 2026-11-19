@@ -99,7 +99,7 @@ class LocalSandboxBackend implements LocalBackendContract {
   }
   async persist(profile: unknown = this.profile) {
     const next = this.unlock(this.normalize(structuredClone(profile)));
-    localStorage.setItem('pokebonk.local.profile.v1', JSON.stringify(next));
+    localStorage.setItem('baoke.local.profile.v1', JSON.stringify(next));
     this.current = next;
     return structuredClone(next);
   }
@@ -133,7 +133,7 @@ class LocalSandboxBackend implements LocalBackendContract {
     return profile;
   }
   async loadProfile() {
-    const raw = localStorage.getItem('pokebonk.local.profile.v1');
+    const raw = localStorage.getItem('baoke.local.profile.v1');
     this.current = this.unlock(this.normalize(raw ? JSON.parse(raw) : null));
     // Reject damaged recovery envelopes before startup exposes a playable
     // profile that could overwrite the previous run's checkpoint.
@@ -210,17 +210,17 @@ class LocalSandboxBackend implements LocalBackendContract {
   async autoWaiting() {
     const saved=await this.savedBlob('runauto');
     if(!saved||saved.id===this.activeTicket)return false;
-    const raw=localStorage.getItem('pokebonk.local.pending.v1');
+    const raw=localStorage.getItem('baoke.local.pending.v1');
     if(!raw)return false;
     const pending=localObject(JSON.parse(raw));
     return localObject(pending['ticket'])['id']===saved.id;
   }
   keepLive(_account: unknown, ticket: LocalRunTicket, result: LocalRunResult) {
-    localStorage.setItem('pokebonk.local.pending.v1', JSON.stringify({ ticket:localTicket(ticket), result:localResult(result) }));
+    localStorage.setItem('baoke.local.pending.v1', JSON.stringify({ ticket:localTicket(ticket), result:localResult(result) }));
   }
-  hasPending() { return localStorage.getItem('pokebonk.local.pending.v1')!==null; }
+  hasPending() { return localStorage.getItem('baoke.local.pending.v1')!==null; }
   async retryNow() {
-    const raw=localStorage.getItem('pokebonk.local.pending.v1');
+    const raw=localStorage.getItem('baoke.local.pending.v1');
     if(!raw)return {left:0,saved:0};
     const pending=localObject(JSON.parse(raw)),ticket=localTicket(pending['ticket']);
     const id=ticket.id;
@@ -257,7 +257,7 @@ class LocalSandboxBackend implements LocalBackendContract {
     this.activeTicket=null;
     return { profile: persisted, record, ranked: false, stardust: 0, local: true };
   }
-  runKeys() {return ['pokebonk.local.pending.v1',`pb.runauto.${this.account.id}`,`pb.runsave.${this.account.id}`];}
+  runKeys() {return ['baoke.local.pending.v1',`pb.runauto.${this.account.id}`,`pb.runsave.${this.account.id}`];}
   clearRun(id:string) {
     for(const key of this.runKeys()) {
       const raw=localStorage.getItem(key);

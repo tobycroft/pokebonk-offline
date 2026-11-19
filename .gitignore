@@ -8,7 +8,7 @@ android/.gradle/
 android/**/build/
 android/app/src/main/assets/www/
 android/local.properties
-android/app/src/main/res/drawable-nodpi/pokebonk_logo.png
+android/app/src/main/res/drawable-nodpi/baoke_logo.png
 *.jks
 *.keystore
 *.p12

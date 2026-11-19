@@ -5,7 +5,7 @@ import {readSnapshot,snapshotDirectory} from './upstream-snapshot.ts';
 import {offlineVersion,sourceDigest} from './release-source.ts';
 import {parseProvenance,releaseNotes,releaseRequired} from '../types/release.ts';
 const snapshotRoot=process.argv[2]??snapshotDirectory;
-const publish=process.env['POKEBONK_PUBLISH']==='true';
+const publish=process.env['BAOKE_PUBLISH']==='true';
 if(publish&&path.resolve(snapshotRoot)!==path.resolve(snapshotDirectory))throw new Error('Only the repository snapshot can be published');
 const {manifest}=await readSnapshot(snapshotRoot);
 const build=manifest.upstreamBuild,upstreamVersion=manifest.upstreamVersion;

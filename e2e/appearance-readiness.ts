@@ -7,7 +7,7 @@ import {decodeAppearanceImages} from './appearance-checks.ts';
 
 // Generated portraits intentionally start hidden without src while their async
 // palette job runs. Exercise that real image state in the production shell.
-const root=await mkdtemp(path.join(os.tmpdir(),'pokebonk-appearance-ready-'));
+const root=await mkdtemp(path.join(os.tmpdir(),'baoke-appearance-ready-'));
 let app:ElectronApplication|undefined;
 try {
   await writeFile(path.join(root,'index.html'),'<title>Appearance readiness</title><div class="lk-card"></div>');
@@ -15,7 +15,7 @@ try {
   await writeFile(path.join(root,'corrupt.png'),'not a PNG');
   const args=['dist/desktop/main.js'];
   if(process.env['CI']&&process.platform==='linux')args.push('--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader');
-  app=await electron.launch({args,env:{...process.env,POKEBONK_GAME_DIR:root,POKEBONK_USER_DATA_DIR:path.join(root,'profile')}});
+  app=await electron.launch({args,env:{...process.env,BAOKE_GAME_DIR:root,BAOKE_USER_DATA_DIR:path.join(root,'profile')}});
   const page=await app.firstWindow();
   await page.locator('.lk-card').waitFor({state:'attached'});
   await page.evaluate(()=>{

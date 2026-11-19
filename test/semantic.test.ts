@@ -37,7 +37,7 @@ test('semantic patches survive renamed upstream identifiers',()=>{
   const result=patchGame(rename(main),rename(config),'const catalogs=[__ROSTER__,__LAB__,__ITEMS__,__BIOMES__];const profile=__PROFILE__;const score=__SCORE__;');
   assert.match(result.main,/p\.localSandbox&&p\.quests\[q\.id\]\)return q\.goal/);
   assert.match(result.main,/const catalogs=\[renamed_rosterAlias/);
-  assert.match(result.main,/window\.__pokebonkLocalApp=new Application/);
+  assert.match(result.main,/window\.__baokeLocalApp=new Application/);
   assert.match(result.config,/p\.localSandbox&&p\.league\.includes\(m\)/);
   assert.match(result.config,/document\.baseURI/);
 });
@@ -94,12 +94,12 @@ test('split menu modules keep profile and reward patches in their owning module'
     class Shell{boot(){}} await new Shell().boot();`;
   const result=patchGame(application,config,'const profile=__PROFILE__;const season=__SEASON__;const score=__SCORE__;function createLocalSandboxBackend(){}',{source:menus,path:'./menus.js'});
   assert.match(result.main,/import \{createLocalSandboxBackend\} from "\.\/menus.js"/);
-  assert.match(result.main,/window\.__pokebonkLocalApp=new Shell/);
+  assert.match(result.main,/window\.__baokeLocalApp=new Shell/);
   assert.ok(result.menus);
   assert.match(result.menus,/const profile=profileSymbol;const season=seasonFunction;/);
   assert.match(result.menus,/p\.localSandbox&&p\.quests\[q\.id\]/);
   assert.match(result.menus,/export \{createLocalSandboxBackend\}/);
-  assert.match(result.menus,/import \{scoreExport as __pokebonkConfig_scoreSymbol\} from "\.\/config.js"/);
+  assert.match(result.menus,/import \{scoreExport as __baokeConfig_scoreSymbol\} from "\.\/config.js"/);
   assert.doesNotMatch(result.main,/const profile=profileSymbol/);
   assert.throws(()=>patchGame(application,config,'',{source:menus.replace('seasonFunction as seasonExport','seasonFunction as wrongExport'),path:'./menus.js'}),/season/);
   assert.throws(()=>patchGame(application.replace('seasonExport as renamedSeason,','').replace('function backendSymbol()',"import {seasonExport as renamedSeason} from './unknown.js'; function backendSymbol()"),config,'',{source:menus,path:'./menus.js'}),/unknown season module/);

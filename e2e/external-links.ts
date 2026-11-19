@@ -4,12 +4,12 @@ import path from 'node:path';
 import os from 'node:os';
 import assert from 'node:assert/strict';
 
-const temp=await mkdtemp(path.join(os.tmpdir(),'pokebonk-links-'));
+const temp=await mkdtemp(path.join(os.tmpdir(),'baoke-links-'));
 await writeFile(path.join(temp,'index.html'),'<title>External link fixture</title>');
-const app=await electron.launch({args:[process.argv[2]??'dist/desktop/main.js',...(process.env['CI']&&process.platform==='linux'?['--no-sandbox']:[])],env:{...process.env,POKEBONK_GAME_DIR:temp,POKEBONK_USER_DATA_DIR:path.join(temp,'profile')}});
+const app=await electron.launch({args:[process.argv[2]??'dist/desktop/main.js',...(process.env['CI']&&process.platform==='linux'?['--no-sandbox']:[])],env:{...process.env,BAOKE_GAME_DIR:temp,BAOKE_USER_DATA_DIR:path.join(temp,'profile')}});
 try {
   const page=await app.firstWindow();
-  await page.waitForURL('pokebonk://game/index.html');
+  await page.waitForURL('baoke://game/index.html');
   await page.waitForLoadState('domcontentloaded');
   await app.evaluate(({shell})=>{
     Reflect.set(globalThis,'openedUrls',[]);
@@ -24,10 +24,10 @@ try {
     await page.evaluate(url=>{window.open(url,'_blank');},url);
   }
   assert.equal(await app.evaluate(()=>Reflect.get(globalThis,'openedUrls').length),2);
-  assert.equal(page.url(),'pokebonk://game/index.html');
+  assert.equal(page.url(),'baoke://game/index.html');
   assert.equal(await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().length),1);
   assert.equal(await page.evaluate(()=>fetch('https://example.com').then(()=>false,()=>true)),true);
-  await page.goto('pokebonk://game/index.html');
+  await page.goto('baoke://game/index.html');
   await app.evaluate(({shell,dialog})=>{
     shell.openExternal=async()=>{throw new Error('Browser unavailable');};
     Reflect.set(globalThis,'launchErrors',[]);

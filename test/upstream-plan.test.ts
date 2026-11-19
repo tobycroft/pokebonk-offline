@@ -17,7 +17,7 @@ test('new unreviewed builds stay changed but cannot enter acquisition or publish
 });
 
 test('identity command reports a review hold and still rejects identity and HTTP failures',async()=>{
-  const root=await mkdtemp(path.join(tmpdir(),'pokebonk-sync-plan-'));
+  const root=await mkdtemp(path.join(tmpdir(),'baoke-sync-plan-'));
   try {
     const accepted=await readSnapshotManifest();
     const loader=path.join(root,'upstream.mjs');

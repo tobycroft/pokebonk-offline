@@ -26,7 +26,7 @@ export function inspectGame(main: string, config: string, menus=main) {
     const exported = nameOf(one(nodesOf(configTree,'ExportSpecifier', n => maybeName(n.local) === localName), `export ${localName}`).exported);
     const imports=nodesOf(tree,'ImportSpecifier', n => maybeName(n.imported) === exported);
     if(!imports.length&&menus!==main) {
-      const local=`__pokebonkConfig_${localName}`;
+      const local=`__baokeConfig_${localName}`;
       if(nodesOf(tree,'Identifier',n=>n.name===local).length)throw new Error('Unsupported upstream: config binding collision');
       extraImports.push({imported:exported,local});return local;
     }
@@ -126,7 +126,7 @@ export function patchGame(main: string,config: string,template: string,menus?:{s
   const patchedMain=edits(main,[
     ...menus?[]:menuEdits,
     {start:info.backend.start,end:info.backend.end,text:(menus?'':shim)+`\nfunction ${nameOf(info.backend.id)}(){return createLocalSandboxBackend()}`},
-    {start:boot.start,end:boot.end,text:`await (window.__pokebonkLocalApp=${instance}).boot()`},
+    {start:boot.start,end:boot.end,text:`await (window.__baokeLocalApp=${instance}).boot()`},
   ]);
   const profile=nameOf(info.looks.params[0]),member=nameOf(info.looks.params[1]);
   const urls=nodesOf(info.configTree,'VariableDeclarator',n=>n.init?.type==='ArrowFunctionExpression'&&n.init.body.type==='TemplateLiteral'&&/assets\/|data\//.test(config.slice(n.init.body.start,n.init.body.end)));

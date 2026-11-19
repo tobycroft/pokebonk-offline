@@ -62,7 +62,7 @@ test('ambiguous or malformed upstream mappings reject rather than guessing a rel
 });
 
 test('pending Changesets stop release planning until versioned',async()=>{
-  const root=await mkdtemp(path.join(os.tmpdir(),'pokebonk-release-plan-'));
+  const root=await mkdtemp(path.join(os.tmpdir(),'baoke-release-plan-'));
   try {
     await mkdir(path.join(root,'.changeset'));
     await writeFile(path.join(root,'package.json'),JSON.stringify({version:'0.0.1'}));
@@ -71,12 +71,12 @@ test('pending Changesets stop release planning until versioned',async()=>{
     const command=`import {offlineVersion} from ${JSON.stringify(moduleUrl)};console.log(await offlineVersion());`;
     const run=()=>execFileSync(process.execPath,['--input-type=module','-e',command],{cwd:root,encoding:'utf8',stdio:'pipe'});
     assert.equal(run().trim(),'0.0.1');
-    await writeFile(path.join(root,'.changeset/pending.md'),'---\n"pokebonk-offline-builder": patch\n---\nFix.');
+    await writeFile(path.join(root,'.changeset/pending.md'),'---\n"baoke-offline-builder": patch\n---\nFix.');
     assert.throws(run,/Version pending changesets/);
   } finally {await rm(root,{recursive:true,force:true});}
 });
 test('release note CLI rejects a payload that differs from the planned tag or title',async()=>{
-  const root=await mkdtemp(path.join(os.tmpdir(),'pokebonk-release-notes-'));
+  const root=await mkdtemp(path.join(os.tmpdir(),'baoke-release-notes-'));
   try {
     const metadata=path.join(root,'info.json'),notes=path.join(root,'notes.md'),provenance=path.join(root,'release-info.json');
     await writeFile(metadata,JSON.stringify(info));

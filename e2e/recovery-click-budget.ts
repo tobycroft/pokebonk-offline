@@ -8,17 +8,17 @@ import {resumeSavedRun} from './run-save-checks.ts';
 // This fixture verifies native input acknowledgment under a long synchronous
 // handler. The real game's serialization, restoration and settlement remain in
 // electron.ts; a fixture state is not gameplay acceptance.
-const root=await mkdtemp(path.join(os.tmpdir(),'pokebonk-recovery-budget-'));
+const root=await mkdtemp(path.join(os.tmpdir(),'baoke-recovery-budget-'));
 await writeFile(path.join(root,'index.html'),`<body>
   <div class="sv-card"><button>繼續</button></div>
   <script>
-    window.__pokebonkLocalApp={run:null};
+    window.__baokeLocalApp={run:null};
     document.querySelector('button').onclick=event=>{
       document.body.dataset.trusted=String(event.isTrusted);
       const deadline=performance.now()+35000;
       while(performance.now()<deadline){}
       document.querySelector('.sv-card').remove();
-      window.__pokebonkLocalApp.run={state:'paused'};
+      window.__baokeLocalApp.run={state:'paused'};
     };
   </script>
 </body>`);
@@ -27,7 +27,7 @@ const results:{mode:string;elapsed:number;clickTimedOut:boolean;trusted:string|n
 try {
   app=await electron.launch({
     args:['dist/desktop/main.js',...(process.platform==='linux'?['--no-sandbox','--disable-gpu']:[])],
-    env:{...process.env,POKEBONK_GAME_DIR:root,POKEBONK_USER_DATA_DIR:path.join(root,'profile')},
+    env:{...process.env,BAOKE_GAME_DIR:root,BAOKE_USER_DATA_DIR:path.join(root,'profile')},
     timeout:30000,
   });
   const page=await app.firstWindow();
@@ -46,7 +46,7 @@ try {
         clickTimedOut=true;
       }
       assert.equal(clickTimedOut,true,'The legacy click must time out during the synchronous handler');
-      await page.waitForFunction(()=>window.__pokebonkLocalApp.run?.state==='paused',null,{timeout:15000});
+      await page.waitForFunction(()=>window.__baokeLocalApp.run?.state==='paused',null,{timeout:15000});
     }
     const elapsed=performance.now()-started,trusted=await page.locator('body').getAttribute('data-trusted');
     assert.equal(trusted,'true','Recovery must receive actual native input');
@@ -69,7 +69,7 @@ try {
   const trusted=await page.locator('body').getAttribute('data-trusted');
   assert.equal(trusted,'true');
   assert.equal(await page.locator('.sv-card').count(),1);
-  assert.equal(await page.evaluate(()=>window.__pokebonkLocalApp.run),null);
+  assert.equal(await page.evaluate(()=>window.__baokeLocalApp.run),null);
   results.push({mode:'failed-restoration',elapsed:failedElapsed,clickTimedOut:false,trusted});
   console.log('Recovery failure remains observable:',results.at(-1));
 } finally {

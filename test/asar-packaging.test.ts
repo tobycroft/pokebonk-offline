@@ -23,7 +23,7 @@ test('the matcher resolved by Electron packaging honors the preprocessing expans
   assert.equal(method(ordinary,'match').call(ordinary,'x/a/b/y/c/z'),false);
 });
 test('ASAR retains files and bytes through wildcard selection and unpacking',async()=>{
-  const root=await mkdtemp(path.join(tmpdir(),'pokebonk-asar-'));
+  const root=await mkdtemp(path.join(tmpdir(),'baoke-asar-'));
   const names=['.hidden','ignore/file.txt','main.mjs','nested/asset.png','nested/code.js','package.json','space dir/a[1].js'];
   try {
     const src=path.join(root,'src');

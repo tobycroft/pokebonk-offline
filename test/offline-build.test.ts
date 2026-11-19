@@ -9,7 +9,7 @@ import {readSnapshotManifest,writeSnapshot,readSnapshot} from '../scripts/upstre
 import {parseManifest} from '../types/metadata.ts';
 
 test('a checked-out snapshot prepares without fetch and rejects candidate publication',async()=>{
-  const root=await mkdtemp(path.join(os.tmpdir(),'pokebonk-offline-build-'));
+  const root=await mkdtemp(path.join(os.tmpdir(),'baoke-offline-build-'));
   try {
     const input=await readSnapshotManifest();
     execFileSync(process.execPath,['--import','./test/no-upstream-network.ts','scripts/prepare-game.ts',root],{stdio:'pipe'});
@@ -25,15 +25,15 @@ test('a checked-out snapshot prepares without fetch and rejects candidate public
       assert.notEqual(result.status,0);assert.ok(result.stderr.includes(`Missing required resource: ${omitted}`));
     }
     await writeFile(manifestPath,savedManifest);
-    const plan=execFileSync(process.execPath,['--import','./test/no-upstream-network.ts','scripts/check-update.ts'],{encoding:'utf8',env:{...process.env,POKEBONK_PUBLISH:'false',GITHUB_OUTPUT:''},stdio:'pipe'});
+    const plan=execFileSync(process.execPath,['--import','./test/no-upstream-network.ts','scripts/check-update.ts'],{encoding:'utf8',env:{...process.env,BAOKE_PUBLISH:'false',GITHUB_OUTPUT:''},stdio:'pipe'});
     assert.match(plan,new RegExp(`snapshotDigest=${input.digest}`));
-    const candidate=spawnSync(process.execPath,['--import','./test/no-upstream-network.ts','scripts/check-update.ts','cache/upstream-candidate'],{encoding:'utf8',env:{...process.env,POKEBONK_PUBLISH:'true',GITHUB_OUTPUT:''}});
+    const candidate=spawnSync(process.execPath,['--import','./test/no-upstream-network.ts','scripts/check-update.ts','cache/upstream-candidate'],{encoding:'utf8',env:{...process.env,BAOKE_PUBLISH:'true',GITHUB_OUTPUT:''}});
     assert.notEqual(candidate.status,0);assert.match(candidate.stderr,/Only the repository snapshot can be published/);
   }finally{await rm(root,{recursive:true,force:true});}
 });
 
 test('a failed sync cannot replace the previous candidate or committed snapshot',async()=>{
-  const root=await mkdtemp(path.join(os.tmpdir(),'pokebonk-failed-sync-'));
+  const root=await mkdtemp(path.join(os.tmpdir(),'baoke-failed-sync-'));
   try {
     const files=new Map([['index.html',Buffer.from('<meta name="pokebonk-build" content="previous">')]]);
     const candidate=path.join(root,'candidate');

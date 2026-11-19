@@ -6,8 +6,8 @@ import {dismissMenuNotices} from './game-checks.ts';
 function readRunStorage(key:string) {
   return {
     raw:localStorage.getItem(key),
-    profile:localStorage.getItem('pokebonk.local.profile.v1'),
-    pending:localStorage.getItem('pokebonk.local.pending.v1'),
+    profile:localStorage.getItem('baoke.local.profile.v1'),
+    pending:localStorage.getItem('baoke.local.pending.v1'),
     manual:localStorage.getItem('pb.runsave.local-sandbox'),
     auto:localStorage.getItem('pb.runauto.local-sandbox'),
   };
@@ -21,26 +21,26 @@ export async function resumeSavedRun(page:Page) {
   await page.locator('.sv-card').getByRole('button',{name:'繼續',exact:true}).click({noWaitAfter:true,timeout});
   const remaining=timeout-(performance.now()-started);
   assert.ok(remaining>0,'Saved-run recovery exceeded its total deadline');
-  await page.waitForFunction(()=>{const run=window.__pokebonkLocalApp.run;return !document.querySelector('.sv-card')&&run&&(run.state==='play'||run.state==='paused');},null,{timeout:remaining,polling:100});
+  await page.waitForFunction(()=>{const run=window.__baokeLocalApp.run;return !document.querySelector('.sv-card')&&run&&(run.state==='play'||run.state==='paused');},null,{timeout:remaining,polling:100});
   return performance.now()-started;
 }
 
 // Both restarts terminate the actual native process and reopen its disposable
 // profile. A renderer reload cannot prove a saved run survives process loss.
 export async function checkRunSaves(page:Page,restart:()=>Promise<Page>,focus:()=>Promise<void>) {
-  const baseline=await page.evaluate(()=>({runs:window.__pokebonkLocalApp.meta.profile.runs.length,hold:window.__pokebonkLocalApp.meta.profile.counters['holdSecs']??0}));
+  const baseline=await page.evaluate(()=>({runs:window.__baokeLocalApp.meta.profile.runs.length,hold:window.__baokeLocalApp.meta.profile.counters['holdSecs']??0}));
   let previousHold=baseline.hold;
   for(const kind of ['manual','auto'] as const) {
-    await page.evaluate(()=>window.__pokebonkLocalApp.startRun({species:4,biome:'forest',tier:0,boosts:[]}));
-    await page.waitForFunction(()=>(window.__pokebonkLocalApp.run?.time??0)>3,null,{timeout:30000});
+    await page.evaluate(()=>window.__baokeLocalApp.startRun({species:4,biome:'forest',tier:0,boosts:[]}));
+    await page.waitForFunction(()=>(window.__baokeLocalApp.run?.time??0)>3,null,{timeout:30000});
     if(kind==='manual') {
-      await page.evaluate(()=>{const run=window.__pokebonkLocalApp.run;if(!run)throw Error('Missing run');run.input.releaseLock();run.pause();});
-      await page.waitForFunction(()=>document.pointerLockElement===null&&window.__pokebonkLocalApp.run?.state==='paused');
+      await page.evaluate(()=>{const run=window.__baokeLocalApp.run;if(!run)throw Error('Missing run');run.input.releaseLock();run.pause();});
+      await page.waitForFunction(()=>document.pointerLockElement===null&&window.__baokeLocalApp.run?.state==='paused');
       await focus();
       await page.getByRole('button',{name:'儲存並退出',exact:true}).click();
-      await page.waitForFunction(()=>!window.__pokebonkLocalApp.run,null,{timeout:15000});
+      await page.waitForFunction(()=>!window.__baokeLocalApp.run,null,{timeout:15000});
     } else {
-      await page.evaluate(()=>{const run=window.__pokebonkLocalApp.run;if(!run)throw Error('Missing run');run.nextAuto=0;run.checkpoint();});
+      await page.evaluate(()=>{const run=window.__baokeLocalApp.run;if(!run)throw Error('Missing run');run.nextAuto=0;run.checkpoint();});
       await page.waitForFunction(()=>localStorage.getItem('pb.runauto.local-sandbox')!==null,null,{timeout:15000});
     }
     const key=kind==='manual'?'pb.runsave.local-sandbox':'pb.runauto.local-sandbox';
@@ -68,24 +68,24 @@ export async function checkRunSaves(page:Page,restart:()=>Promise<Page>,focus:()
     console.log('Native',kind,'restored scene ready after',Math.round(restoreElapsed),'ms including the recovery click');
     await dismissMenuNotices(page);
     await focus();
-    await page.evaluate(()=>window.__pokebonkLocalApp.run?.resume());
-    await page.waitForFunction(time=>(window.__pokebonkLocalApp.run?.time??0)>time+.5,saved.time,{timeout:30000});
+    await page.evaluate(()=>window.__baokeLocalApp.run?.resume());
+    await page.waitForFunction(time=>(window.__baokeLocalApp.run?.time??0)>time+.5,saved.time,{timeout:30000});
     const time=await page.evaluate(async()=>{
-      const app=window.__pokebonkLocalApp,run=app.run;if(!run)throw Error('Missing restored run');
+      const app=window.__baokeLocalApp,run=app.run;if(!run)throw Error('Missing restored run');
       const time=run.time;run.endHow='quit';await run.finish(false,true);app.toMenu();return time;
     });
-    const profile=await page.evaluate(()=>window.__pokebonkLocalApp.meta.profile);
+    const profile=await page.evaluate(()=>window.__baokeLocalApp.meta.profile);
     assert.equal(profile.runs.length,baseline.runs+(kind==='manual'?1:2));
     const hold=profile.counters['holdSecs']??0;
     assert.ok(Math.abs(hold-previousHold-Math.floor(time))<=1,'Recovered play time must be awarded once');
     previousHold=hold;
-    assert.equal(await page.evaluate(()=>localStorage.getItem('pokebonk.local.pending.v1')),null);
+    assert.equal(await page.evaluate(()=>localStorage.getItem('baoke.local.pending.v1')),null);
     assert.equal(await page.evaluate(()=>localStorage.getItem('pb.runauto.local-sandbox')),null);
     console.log('Native',kind,'save, process restart, recovery and settlement passed');
   }
   page=await restart();
   assert.equal(await page.locator('.sv-card').count(),0,'Settled saves must not be offered again');
-  assert.equal((await page.evaluate(()=>window.__pokebonkLocalApp.meta.profile)).runs.length,baseline.runs+2);
+  assert.equal((await page.evaluate(()=>window.__baokeLocalApp.meta.profile)).runs.length,baseline.runs+2);
   return page;
 }
 
@@ -99,7 +99,7 @@ export async function checkCorruptRecovery(page:Page,restart:()=>Promise<Page>) 
   await page.getByRole('button',{name:'重試',exact:true}).waitFor();
   assert.match(await page.locator('body').innerText(),/原始資料已保留/);
   assert.doesNotMatch(await page.locator('body').innerText(),/進度儲存在伺服器/);
-  assert.equal(await page.evaluate(()=>Boolean(window.__pokebonkLocalApp?.meta?.profile)),false);
+  assert.equal(await page.evaluate(()=>Boolean(window.__baokeLocalApp?.meta?.profile)),false);
   assert.deepEqual(await page.evaluate(()=>Object.fromEntries(Object.keys(localStorage).map(key=>[key,localStorage.getItem(key)]))),before);
   await page.screenshot({path:'evidence/electron-corrupt-recovery.png'});
   console.log('Corrupt recovery blocks startup with truthful local copy and preserves all raw storage');

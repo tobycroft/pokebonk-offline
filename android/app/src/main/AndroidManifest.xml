@@ -14,7 +14,7 @@
         android:largeHeap="true"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
-        android:theme="@style/Theme.PokebonkOffline"
+        android:theme="@style/Theme.BaokeOffline"
         android:usesCleartextTraffic="false"
         tools:targetApi="tiramisu">
         <activity

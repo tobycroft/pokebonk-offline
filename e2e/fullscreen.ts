@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 
 // Drive the real Fullscreen API through the production permission boundary.
-const temp=await mkdtemp(path.join(os.tmpdir(),'pokebonk-fullscreen-'));
+const temp=await mkdtemp(path.join(os.tmpdir(),'baoke-fullscreen-'));
 const fixture=`<button id="toggle">Toggle fullscreen</button><script>
 window.result='idle';
 document.addEventListener('fullscreenchange',()=>window.result=document.fullscreenElement?'entered':'exited');
@@ -24,7 +24,7 @@ await writeFile(path.join(temp,'index.html'),fixture+'<iframe src="/frame.html" 
 await writeFile(path.join(temp,'frame.html'),fixture);
 const args=['dist/desktop/main.js'];
 if(process.env['CI']&&process.platform==='linux')args.push('--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader');
-const app=await electron.launch({args,env:{...process.env,POKEBONK_GAME_DIR:temp,POKEBONK_USER_DATA_DIR:path.join(temp,'profile')}}).catch(async error=>{await rm(temp,{recursive:true,force:true});throw error;});
+const app=await electron.launch({args,env:{...process.env,BAOKE_GAME_DIR:temp,BAOKE_USER_DATA_DIR:path.join(temp,'profile')}}).catch(async error=>{await rm(temp,{recursive:true,force:true});throw error;});
 try {
   const page=await app.firstWindow();
   const errors: string[]=[];
@@ -92,7 +92,7 @@ try {
   await page.click('#toggle');
   await page.waitForFunction(()=>['denied','pending-timeout'].includes(Reflect.get(window,'result'))&&!document.fullscreenElement);
   await app.evaluate(async({BrowserWindow})=>{
-    await BrowserWindow.getAllWindows()[0]?.loadURL('pokebonk://game/index.html');
+    await BrowserWindow.getAllWindows()[0]?.loadURL('baoke://game/index.html');
   });
   // Restore the original policy only in this disposable test process.
   await app.evaluate(({session})=>{

@@ -11,7 +11,7 @@ desktop archives and one signed APK, plus `release-info.json` and `SHA256SUMS.tx
 - macOS with `codesign`, `ditto`, `zip` and `tar`; at least 8 GiB free for staging.
 - An existing JDK 17+ in `JAVA_HOME`, Android SDK in `ANDROID_HOME`, SDK platform
   36 and Build Tools 36.0.0. Signing remains ad hoc on Mac, not notarized.
-- The original Android keystore in `POKEBONK_ANDROID_KEYSTORE`, with
+- The original Android keystore in `BAOKE_ANDROID_KEYSTORE`, with
   `ANDROID_KEYSTORE_PASSWORD` and `ANDROID_KEY_PASSWORD` supplied by the existing
   project secret provider. The pinned certificate must match; do not create a
   replacement key. Existing project-owned dotenv storage can be supplied with

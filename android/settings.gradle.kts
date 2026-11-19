@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "PokebonkOffline"
+rootProject.name = "BaokeOffline"
 include(":app")

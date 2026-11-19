@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {githubVersionIssues,reconcileVersionIssue} from '../scripts/upstream-issue.ts';
 import type {IssueStore,VersionIssue} from '../scripts/upstream-issue.ts';
-const repository='VdustR/pokebonk-offline';
+const repository='VdustR/baoke-offline';
 const current={upstreamBuild:'accepted',upstreamVersion:'0.9.11'};
 const remote={upstreamBuild:'next',upstreamVersion:'0.9.13'};
 const start='<!-- pokebonk-upstream-update:start -->',end='<!-- pokebonk-upstream-update:end -->';

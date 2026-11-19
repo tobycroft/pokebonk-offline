@@ -2,15 +2,15 @@ plugins {
     id("com.android.application")
 }
 
-val generatedVersionCode = providers.gradleProperty("pokebonkVersionCode").orElse("1")
-val generatedVersionName = providers.gradleProperty("pokebonkVersionName").orElse("dev")
+val generatedVersionCode = providers.gradleProperty("baokeVersionCode").orElse("1")
+val generatedVersionName = providers.gradleProperty("baokeVersionName").orElse("dev")
 
 android {
-    namespace = "dev.vdustr.pokebonk.offline"
+    namespace = "dev.vdustr.baoke.offline"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "dev.vdustr.pokebonk.offline"
+        applicationId = "dev.vdustr.baoke.offline"
         minSdk = 26
         targetSdk = 36
         versionCode = generatedVersionCode.get().toInt()

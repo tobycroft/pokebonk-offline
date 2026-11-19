@@ -8,7 +8,7 @@ import {checkVictory,decodeVictoryImages,missingGraphicsNotice} from './victory-
 import {dismissMenuNotices} from './game-checks.ts';
 
 export async function checkVictoryRegression(game:string,executablePath?:string,negativeControl=false) {
-  const userData=await mkdtemp(path.join(os.tmpdir(),'pokebonk-victory-'));
+  const userData=await mkdtemp(path.join(os.tmpdir(),'baoke-victory-'));
   const args=executablePath?[]:['dist/desktop/main.js'];
   if(process.env['CI']&&process.platform==='linux')args.push('--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader');
   const errors:string[]=[],missing:string[]=[],failed:string[]=[];
@@ -17,14 +17,14 @@ export async function checkVictoryRegression(game:string,executablePath?:string,
   let app:ElectronApplication|undefined;
   await mkdir('evidence',{recursive:true});
   try {
-    app=await electron.launch({args,...(executablePath?{executablePath:path.resolve(executablePath)}:{}),env:{...process.env,POKEBONK_GAME_DIR:game,POKEBONK_USER_DATA_DIR:userData},timeout:120000});
+    app=await electron.launch({args,...(executablePath?{executablePath:path.resolve(executablePath)}:{}),env:{...process.env,BAOKE_GAME_DIR:game,BAOKE_USER_DATA_DIR:userData},timeout:120000});
     const page=await app.firstWindow();
     page.setDefaultTimeout(30000);
     page.setDefaultNavigationTimeout(30000);
     page.on('pageerror',error=>errors.push(error.message));
     page.on('response',response=>{if(response.status()>=400)missing.push(response.status()+' '+response.url());});
     page.on('requestfailed',request=>{if(request.resourceType()==='image')failed.push(request.url()+': '+request.failure()?.errorText);});
-    await page.waitForFunction(()=>window.__pokebonkLocalApp?.meta?.profile?.localSandbox,null,{timeout:120000});
+    await page.waitForFunction(()=>window.__baokeLocalApp?.meta?.profile?.localSandbox,null,{timeout:120000});
     await dismissMenuNotices(page);
     for(const config of [{species:4,biome:'forest',tier:0},{species:150,biome:'iris',tier:2}]) {
       const images=await checkVictory(page,config);
@@ -45,7 +45,7 @@ export async function checkVictoryRegression(game:string,executablePath?:string,
         }
         await page.getByText(missingGraphicsNotice).waitFor({state:'visible',timeout:15000});
         await page.screenshot({path:'evidence/victory-missing-notice-control.png'});
-        assert.ok(missing.some(entry=>entry.includes('404 pokebonk://game/assets/victory-regression-missing.png')),'Network observer must catch a missing image');
+        assert.ok(missing.some(entry=>entry.includes('404 baoke://game/assets/victory-regression-missing.png')),'Network observer must catch a missing image');
         await image.evaluate((image,src)=>image.setAttribute('src',src),original);
         await decodeVictoryImages(page);
         // Keep injected requests separate from the normal scenario evidence.

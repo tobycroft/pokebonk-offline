@@ -41,10 +41,10 @@ export async function decodeVictoryImages(page:Page) {
 export const missingGraphicsNotice=/還有 (?:1 個圖像未載入|\d+ 張影象尚未載入)/;
 
 export async function checkVictory(page:Page,{species=4,biome='forest',tier=0}={}) {
-  assert.equal(await page.evaluate(config=>window.__pokebonkLocalApp.startRun({...config,boosts:[]}),{species,biome,tier}),true);
-  await page.waitForFunction(()=>window.__pokebonkLocalApp.run?.state==='play',null,{timeout:90000});
+  assert.equal(await page.evaluate(config=>window.__baokeLocalApp.startRun({...config,boosts:[]}),{species,biome,tier}),true);
+  await page.waitForFunction(()=>window.__baokeLocalApp.run?.state==='play',null,{timeout:90000});
   await page.evaluate(async()=>{
-    const run=window.__pokebonkLocalApp.run;
+    const run=window.__baokeLocalApp.run;
     if(!run)throw new Error('Expected active run');
     // Seed only gameplay outcomes, then use the real result, settlement and UI.
     // These branches are otherwise absent from a short, empty run.
@@ -68,7 +68,7 @@ export async function checkVictory(page:Page,{species=4,biome='forest',tier=0}={
   // DOM immediately after decode would miss failures in off-screen loaders.
   await page.waitForTimeout(9000);
   assert.equal(await page.getByText(missingGraphicsNotice).count(),0,'Victory must not leave the missing-graphics retry notice');
-  const last=await page.evaluate(()=>window.__pokebonkLocalApp.meta.profile.runs[0]);
+  const last=await page.evaluate(()=>window.__baokeLocalApp.meta.profile.runs[0]);
   assert.equal(last?.['victory'],true,'Victory must reach local settlement');
   assert.equal(last?.['species'],species);
   return images;

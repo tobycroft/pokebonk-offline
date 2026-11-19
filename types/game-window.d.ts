@@ -19,7 +19,7 @@ interface GameRun {
 interface GamePreviewMesh {parent:unknown;count:number}
 interface Window {
   // The patch exports this instance solely for native smoke verification.
-  __pokebonkLocalApp: {
+  __baokeLocalApp: {
     meta: {profile:import('./profile.d.ts').ReadyProfile;tasksReady():number};
     menuScene:{sprites:{batches:Map<number,{mesh:GamePreviewMesh}>}} | null;
     backend:import('./backend.d.ts').SandboxBackend;

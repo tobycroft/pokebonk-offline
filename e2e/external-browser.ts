@@ -4,13 +4,13 @@ import path from 'node:path';
 import os from 'node:os';
 
 // Visible OS acceptance: inspect and then close only the created probe tab.
-const url='https://example.com/?pokebonk-external-link-probe=20261101';
-const temp=await mkdtemp(path.join(os.tmpdir(),'pokebonk-browser-'));
+const url='https://example.com/?baoke-external-link-probe=20261101';
+const temp=await mkdtemp(path.join(os.tmpdir(),'baoke-browser-'));
 await writeFile(path.join(temp,'index.html'),`<a href="${url}" target="_blank" rel="noopener">Open browser probe</a>`);
-const app=await electron.launch({args:['dist/desktop/main.js'],env:{...process.env,POKEBONK_GAME_DIR:temp,POKEBONK_USER_DATA_DIR:path.join(temp,'profile')}});
+const app=await electron.launch({args:['dist/desktop/main.js'],env:{...process.env,BAOKE_GAME_DIR:temp,BAOKE_USER_DATA_DIR:path.join(temp,'profile')}});
 try {
   const page=await app.firstWindow();
-  await page.waitForURL('pokebonk://game/index.html');
+  await page.waitForURL('baoke://game/index.html');
   await page.waitForLoadState('domcontentloaded');
   await app.evaluate(({shell})=>{
     const open=shell.openExternal.bind(shell);

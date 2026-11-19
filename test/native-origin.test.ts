@@ -13,8 +13,8 @@ function boots(source:string,url:string) {
 test('native asset origins boot while unrelated mirrors remain blocked',()=>{
   for(const source of [entry,entry.replaceAll("'",'`')]) {
     const patched=patchNativeOriginGate(source);
-    for(const url of ['pokebonk://game/index.html','https://appassets.androidplatform.net/index.html','https://pokebonk.com/','http://localhost/','http://dev.localhost/'])assert.equal(boots(patched,url),true,url);
-    for(const url of ['https://example.com/','https://game/','pokebonk://game.evil/','pokebonk://game:123/','pokebonk://game@evil/','https://appassets.androidplatform.net.evil/','http://appassets.androidplatform.net/'])assert.equal(boots(patched,url),false,url);
+    for(const url of ['baoke://game/index.html','https://appassets.androidplatform.net/index.html','https://pokebonk.com/','http://localhost/','http://dev.localhost/'])assert.equal(boots(patched,url),true,url);
+    for(const url of ['https://example.com/','https://game/','baoke://game.evil/','baoke://game:123/','baoke://game@evil/','https://appassets.androidplatform.net.evil/','http://appassets.androidplatform.net/'])assert.equal(boots(patched,url),false,url);
   }
 });
 test('whitelisted web hosts boot exactly while other hosts remain blocked',()=>{
@@ -33,5 +33,5 @@ test('entries without an origin gate stay byte-identical and unknown gates fail 
   assert.equal(patchNativeOriginGate(previous),previous);
   assert.throws(()=>patchNativeOriginGate('if(!allowed(location.hostname))blocked();'),/native origin predicate/);
   assert.throws(()=>patchNativeOriginGate(entry.replace("host.endsWith('.local')","false")),/Unsupported native origin predicate/);
-  assert.throws(()=>vm.runInNewContext(patchNativeOriginGate(entry),{location:new URL('pokebonk://game/'),loadGame(){throw new Error('Broken game boot');}}),/Broken game boot/);
+  assert.throws(()=>vm.runInNewContext(patchNativeOriginGate(entry),{location:new URL('baoke://game/'),loadGame(){throw new Error('Broken game boot');}}),/Broken game boot/);
 });

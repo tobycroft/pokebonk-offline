@@ -13,7 +13,7 @@ import type {ReleaseArtifact} from './local-release-policy.ts';
 const mode=process.argv[2]??'release';
 if(!['release','prepare','publish'].includes(mode)||process.argv.length>3)throw new Error('Usage: pnpm release:local [prepare|publish]');
 if(process.platform!=='darwin'||!['arm64','x64'].includes(process.arch))throw new Error('The complete local release runs on macOS (including Mac signing)');
-const repository='VdustR/pokebonk-offline';
+const repository='VdustR/baoke-offline';
 const childEnv={...process.env};
 for(const name of ['ANDROID_KEYSTORE_PASSWORD','ANDROID_KEY_PASSWORD','ANDROID_KEY_ALIAS'])delete childEnv[name];
 const capture=(command:string,args:string[])=>execFileSync(command,args,{env:childEnv,encoding:'utf8',stdio:['ignore','pipe','pipe'],timeout:60000,maxBuffer:16*1024*1024}).trim();
@@ -82,7 +82,7 @@ if(prepared) {
   console.log('Reusing acceptance for the same clean source commit and unchanged artifacts:',receiptFile);
 }
 if(mode!=='publish'&&!prepared) {
-  const keystore=process.env['POKEBONK_ANDROID_KEYSTORE'];
+  const keystore=process.env['BAOKE_ANDROID_KEYSTORE'];
   if(!keystore||!process.env['ANDROID_KEYSTORE_PASSWORD']||!process.env['ANDROID_KEY_PASSWORD'])throw new Error('Configure the existing Android keystore and signing environment before building');
   if(!process.env['JAVA_HOME'])throw new Error('Set JAVA_HOME to an existing JDK 17 or newer');
   const disk=await statfs('.');
@@ -95,7 +95,7 @@ if(mode!=='publish'&&!prepared) {
   const game=path.resolve('build/game');
   for(const [platform,arch] of desktopTargets)node('scripts/package-electron.ts',game,directory,platform,arch);
   node('scripts/stage-android.ts',game);
-  run('android/gradlew',['--project-dir','android','--no-daemon',`-PpokebonkVersionCode=${code}`,`-PpokebonkVersionName=${info.offlineVersion}`,'assembleRelease','lintRelease']);
+  run('android/gradlew',['--project-dir','android','--no-daemon',`-PbaokeVersionCode=${code}`,`-PbaokeVersionName=${info.offlineVersion}`,'assembleRelease','lintRelease']);
   const apkName=`baoke-offline-${info.offlineVersion}-unlocked-android.apk`;
   const apk=path.join(directory,apkName);
   console.log('+ Sign Android APK with the existing pinned certificate');

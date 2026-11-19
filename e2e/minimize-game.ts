@@ -29,11 +29,11 @@ for(const [index,mode] of (modes.length?modes:['immediate','stable','immediate',
   assert.ok(['immediate','stable','ack-legacy','ack-resume-only','ack-stable'].includes(mode),'Unknown minimize probe mode');
   const delayed=mode==='ack-legacy'||mode==='ack-resume-only'||mode==='ack-stable';
   const legacy=mode==='ack-legacy'||mode==='ack-resume-only';
-  const userData=await mkdtemp(path.join(os.tmpdir(),'pokebonk-minimize-'));
+  const userData=await mkdtemp(path.join(os.tmpdir(),'baoke-minimize-'));
   let app:ElectronApplication|undefined;
   const result:Record<string,unknown>={mode,index,observedAt:new Date().toISOString(),executable:executable??'development shell'};
   try {
-    app=await electron.launch({...(executable?{executablePath:path.resolve(executable)}:{}),args:[...(executable?[]:['dist/desktop/main.js']),...(process.platform==='linux'&&process.env['CI']?['--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']:[])],env:{...process.env,POKEBONK_GAME_DIR:path.resolve(game),POKEBONK_USER_DATA_DIR:userData},timeout:120000});
+    app=await electron.launch({...(executable?{executablePath:path.resolve(executable)}:{}),args:[...(executable?[]:['dist/desktop/main.js']),...(process.platform==='linux'&&process.env['CI']?['--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']:[])],env:{...process.env,BAOKE_GAME_DIR:path.resolve(game),BAOKE_USER_DATA_DIR:userData},timeout:120000});
     const running=app,page=await app.firstWindow();
     await page.addInitScript(delayed=>{
       window.__minimizeDelayedHandlers=0;
@@ -58,7 +58,7 @@ for(const [index,mode] of (modes.length?modes:['immediate','stable','immediate',
       }
       window.__minimizeSamples=[];
       window.__minimizeSample=event=>{
-        const app=window.__pokebonkLocalApp,run=app?.run,input:unknown=app?Reflect.get(app,'input'):null;
+        const app=window.__baokeLocalApp,run=app?.run,input:unknown=app?Reflect.get(app,'input'):null;
         const read=(key:string):unknown=>typeof input==='object'&&input!==null?Reflect.get(input,key):null;
         const number=(value:unknown)=>typeof value==='number'&&Number.isFinite(value)?value:null;
         const method=read('lockFlicker'),flicker:unknown=typeof method==='function'?Reflect.apply(method,input,[]):null;
@@ -70,7 +70,7 @@ for(const [index,mode] of (modes.length?modes:['immediate','stable','immediate',
       for(const event of ['blur','focus'])window.addEventListener(event,()=>window.__minimizeSample(event));
     },delayed);
     await page.reload();
-    await page.waitForFunction(()=>window.__pokebonkLocalApp?.meta?.profile?.localSandbox,null,{timeout:120000});
+    await page.waitForFunction(()=>window.__baokeLocalApp?.meta?.profile?.localSandbox,null,{timeout:120000});
     if(delayed)assert.equal(await page.evaluate(()=>window.__minimizeDelayedHandlers),1,'Control only the actual input acquisition consumer');
     await app.evaluate(({BrowserWindow})=>{
       const window=BrowserWindow.getAllWindows()[0];if(!window)throw new Error('Missing native window');
@@ -86,23 +86,23 @@ for(const [index,mode] of (modes.length?modes:['immediate','stable','immediate',
     });
     await focusNativeInput(app);
     await dismissMenuNotices(page);
-    await page.evaluate(()=>window.__pokebonkLocalApp.startRun({species:4,biome:'forest',tier:0,boosts:[]}));
-    await page.waitForFunction(()=>(window.__pokebonkLocalApp.run?.time??0)>1,null,{timeout:90000});
+    await page.evaluate(()=>window.__baokeLocalApp.startRun({species:4,biome:'forest',tier:0,boosts:[]}));
+    await page.waitForFunction(()=>(window.__baokeLocalApp.run?.time??0)>1,null,{timeout:90000});
     if(delayed) {
       await waitForPauseEligibleCapture(page);
-      await page.evaluate(()=>window.__pokebonkLocalApp.run?.pause());
+      await page.evaluate(()=>window.__baokeLocalApp.run?.pause());
       await page.waitForFunction(()=>{const sample=window.__minimizeSample('paused-ready');return sample.pointer===null&&sample.state==='paused'&&!sample.locked;});
-      await page.evaluate(()=>{window.__minimizeHoldAcquisition=true;window.__pokebonkLocalApp.run?.resume();});
+      await page.evaluate(()=>{window.__minimizeHoldAcquisition=true;window.__baokeLocalApp.run?.resume();});
     }else {
       // Isolate lock age from transition/resume guards in the original modes.
       await page.evaluate(()=>{
-        const input:unknown=Reflect.get(window.__pokebonkLocalApp,'input');
+        const input:unknown=Reflect.get(window.__baokeLocalApp,'input');
         if(typeof input!=='object'||input===null)throw new Error('Missing game input');
         const release:unknown=Reflect.get(input,'releaseLock');
         if(typeof release!=='function')throw new Error('Missing game releaseLock');
         Reflect.apply(release,input,[]);
       });
-      await page.waitForFunction(()=>document.pointerLockElement===null&&window.__pokebonkLocalApp.run?.state==='play');
+      await page.waitForFunction(()=>document.pointerLockElement===null&&window.__baokeLocalApp.run?.state==='play');
     }
     const minimize=async()=>{
       result['request']=await running.evaluate(({BrowserWindow})=>{const window=BrowserWindow.getAllWindows()[0];if(!window)throw new Error('Missing native window');const wall=Date.now();window.minimize();return {wall,minimized:window.isMinimized()};});
@@ -159,7 +159,7 @@ for(const [index,mode] of (modes.length?modes:['immediate','stable','immediate',
     }
     await restoreNativeInput(app);
     await page.waitForFunction(()=>document.hasFocus());
-    const restored=await page.evaluate(()=>window.__pokebonkLocalApp.run?.state);result['restored']=restored;
+    const restored=await page.evaluate(()=>window.__baokeLocalApp.run?.state);result['restored']=restored;
     assert.equal(restored,after.state);
     const clock=legacy?'previous input clock':'lock';
     console.log(`${mode}: native minimized, ${clock} ${age.toFixed(1)} ms, ${after.state}, restore ${restored}`);

@@ -1,4 +1,4 @@
-package dev.vdustr.pokebonk.offline;
+package dev.vdustr.baoke.offline;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -73,7 +73,7 @@ public final class MainActivity extends Activity {
         settings.setSupportZoom(false);
 
         CookieManager.getInstance().setAcceptCookie(false);
-        webView.addJavascriptInterface(new SaveDownloadBridge(), "PokebonkAndroid");
+        webView.addJavascriptInterface(new SaveDownloadBridge(), "BaokeAndroid");
         webView.setWebViewClient(new OfflineAssetWebViewClient(getAssets()));
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
@@ -100,7 +100,7 @@ public final class MainActivity extends Activity {
             }
             String fileName = URLUtil.guessFileName(url, contentDisposition, mimeType);
             String script = "(async()=>{const r=await fetch(" + JSONObject.quote(url)
-                + ");const b=await r.blob();const x=new FileReader();x.onloadend=()=>PokebonkAndroid.saveBase64("
+                + ");const b=await r.blob();const x=new FileReader();x.onloadend=()=>BaokeAndroid.saveBase64("
                 + JSONObject.quote(fileName) + "," + JSONObject.quote(mimeType == null ? "application/octet-stream" : mimeType)
                 + ",String(x.result).split(',')[1]);x.readAsDataURL(b);})()";
             webView.evaluateJavascript(script, null);
@@ -329,7 +329,7 @@ public final class MainActivity extends Activity {
             exitConfirmationDialog.dismiss();
             exitConfirmationDialog = null;
         }
-        webView.removeJavascriptInterface("PokebonkAndroid");
+        webView.removeJavascriptInterface("BaokeAndroid");
         webView.stopLoading();
         webView.destroy();
         super.onDestroy();
@@ -350,7 +350,7 @@ public final class MainActivity extends Activity {
                 return;
             }
 
-            String safeName = fileName == null ? "pokebonk_saves.zip" : fileName.replaceAll("[^A-Za-z0-9._-]", "_");
+            String safeName = fileName == null ? "baoke_saves.zip" : fileName.replaceAll("[^A-Za-z0-9._-]", "_");
             pendingDownload = decoded;
             pendingDownloadMimeType = mimeType;
             runOnUiThread(() -> {

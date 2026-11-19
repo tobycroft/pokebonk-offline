@@ -4,7 +4,7 @@ The game's menu button and settings switch use the HTML Fullscreen API. The old 
 
 ## Permission repair
 
-The desktop shell previously allowed only pointerLock. Electron 45.0.0 treats fullscreen as a separate permission ([versioned API reference](https://github.com/electron/electron/blob/v45.0.0/docs/api/session.md#sessetpermissionrequesthandlerhandler)). Both handlers now allow pointerLock and fullscreen only for the main frame at pokebonk://game, with the WebContents also on that origin. Child frames, other origins, automatic-fullscreen, keyboardLock, location, notifications and other capabilities retain the default denial. The upstream controls, fullscreenchange listeners and game pause lifecycle are unchanged.
+The desktop shell previously allowed only pointerLock. Electron 45.0.0 treats fullscreen as a separate permission ([versioned API reference](https://github.com/electron/electron/blob/v45.0.0/docs/api/session.md#sessetpermissionrequesthandlerhandler)). Both handlers now allow pointerLock and fullscreen only for the main frame at baoke://game, with the WebContents also on that origin. Child frames, other origins, automatic-fullscreen, keyboardLock, location, notifications and other capabilities retain the default denial. The upstream controls, fullscreenchange listeners and game pause lifecycle are unchanged.
 
 Restoring the existing Fullscreen API permission is preferable to replacing the game controls with a native IPC bridge: it preserves document.fullscreenElement, control labels and upstream resize handling without adding a preload API or patching downloaded code.
 

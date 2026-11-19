@@ -33,7 +33,7 @@ jobs:
         run: pnpm test
       - name: Build web payload
         env:
-          POKEBONK_ALLOW_ANY_ORIGIN: '1'
+          BAOKE_ALLOW_ANY_ORIGIN: '1'
         run: pnpm prepare:game
       - name: Verify payload integrity
         run: node scripts/verify-game.ts build/game

@@ -18,9 +18,9 @@ import {checkStellarShop} from './stellar-checks.ts';
 import {readStorageDiagnostics} from './storage-diagnostics.ts';
 const game=path.resolve(process.argv[2]??'build/game');
 const executablePath=process.argv[3];
-const userData=await mkdtemp(path.join(os.tmpdir(),'pokebonk-e2e-'));
+const userData=await mkdtemp(path.join(os.tmpdir(),'baoke-e2e-'));
 const metadata=parseMetadata(JSON.parse(await readFile(path.join(game,'offline-build.json'),'utf8')));
-const options={env:{...process.env,POKEBONK_GAME_DIR:game,POKEBONK_USER_DATA_DIR:userData},timeout:120000,args:executablePath?[]:['dist/desktop/main.js'],...(executablePath?{executablePath:path.resolve(executablePath)}:{})};
+const options={env:{...process.env,BAOKE_GAME_DIR:game,BAOKE_USER_DATA_DIR:userData},timeout:120000,args:executablePath?[]:['dist/desktop/main.js'],...(executablePath?{executablePath:path.resolve(executablePath)}:{})};
 // SwiftShader is required for headless Linux; macOS uses its native Metal backend.
 if(process.env['CI'] && process.platform==='linux')options.args.push('--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader');
 await mkdir('evidence',{recursive:true});
@@ -59,7 +59,7 @@ try {
   observe(page);
   await app.evaluate(({app,BrowserWindow})=>{app.focus({steal:true});BrowserWindow.getAllWindows()[0]?.focus();});
   await page.waitForFunction(()=>document.hasFocus());
-  await page.waitForFunction(()=>window.__pokebonkLocalApp?.meta?.profile?.localSandbox,null,{timeout:120000});
+  await page.waitForFunction(()=>window.__baokeLocalApp?.meta?.profile?.localSandbox,null,{timeout:120000});
   await dismissMenuNotices(page);
   await checkOfflineFriends(page);
   await checkEventAssets(page);
@@ -99,7 +99,7 @@ try {
     app=await electron.launch(options);
     const next=await app.firstWindow();observe(next);
     if(ready){
-      await next.waitForFunction(()=>window.__pokebonkLocalApp?.meta?.profile?.localSandbox,null,{timeout:120000});
+      await next.waitForFunction(()=>window.__baokeLocalApp?.meta?.profile?.localSandbox,null,{timeout:120000});
       await next.locator('.mm-nav').waitFor({state:'visible',timeout:30000});
     }
     return next;
@@ -133,7 +133,7 @@ try {
       try {disk=statfsSync(userData);}catch(captureError){captureErrors.push(String(captureError));}
       let timer:ReturnType<typeof setTimeout>|undefined;
       const paths=await Promise.race([
-        app.evaluate(({app,session})=>({requested:process.env['POKEBONK_USER_DATA_DIR'],userData:app.getPath('userData'),sessionData:app.getPath('sessionData'),storage:session.defaultSession.storagePath,persistent:session.defaultSession.isPersistent()})),
+        app.evaluate(({app,session})=>({requested:process.env['BAOKE_USER_DATA_DIR'],userData:app.getPath('userData'),sessionData:app.getPath('sessionData'),storage:session.defaultSession.storagePath,persistent:session.defaultSession.isPersistent()})),
         new Promise<never>((_,reject)=>{timer=setTimeout(()=>reject(Error('Native storage-path capture timed out')),5000);}),
       ]).catch(captureError=>({captureError:String(captureError)})).finally(()=>clearTimeout(timer));
       const pages=app.windows();
@@ -142,7 +142,7 @@ try {
       await writeFile('evidence/electron-storage-failure.json',JSON.stringify({error:String(error),pid:nativeProcess.pid,initialPaths,closeReturns,paths,descriptors,captureErrors,beforeSaveStorage,currentStorage,diskFreeBytes:disk?disk.bavail*disk.bsize:null,diskFreeInodes:disk?.ffree??null},null,2));
       if(page) {
         await page.screenshot({path:'evidence/electron-failure.png'}).catch(()=>{});
-        await writeFile('evidence/electron-failure.json',JSON.stringify({errors,missing,external,url:page.url(),runtime:await page.evaluate(()=>({visibility:document.visibilityState,focused:document.hasFocus(),savedDialogs:document.querySelectorAll('.sv-card').length,run:window.__pokebonkLocalApp?.run?{state:window.__pokebonkLocalApp.run.state,time:window.__pokebonkLocalApp.run.time}:null})).catch(()=>null),text:await page.locator('body').innerText().catch(()=>''),error:String(error)},null,2));
+        await writeFile('evidence/electron-failure.json',JSON.stringify({errors,missing,external,url:page.url(),runtime:await page.evaluate(()=>({visibility:document.visibilityState,focused:document.hasFocus(),savedDialogs:document.querySelectorAll('.sv-card').length,run:window.__baokeLocalApp?.run?{state:window.__baokeLocalApp.run.state,time:window.__baokeLocalApp.run.time}:null})).catch(()=>null),text:await page.locator('body').innerText().catch(()=>''),error:String(error)},null,2));
       }
     }
   } catch(captureError) {console.error('Native failure capture failed:',captureError);}
@@ -163,7 +163,7 @@ try {
       let timer:ReturnType<typeof setTimeout>|undefined;
       try {
         await Promise.race([exited,new Promise<never>((_,reject)=>{timer=setTimeout(()=>reject(Error('Native process did not exit before storage capture')),10000);})]);
-        assert.ok(path.basename(userData).startsWith('pokebonk-e2e-')&&path.dirname(userData)===os.tmpdir());
+        assert.ok(path.basename(userData).startsWith('baoke-e2e-')&&path.dirname(userData)===os.tmpdir());
         // Copy only the owned acceptance profile, even if native paths differ.
         const destination='evidence/electron-cold-profile';
         await mkdir(destination,{recursive:true});

@@ -92,7 +92,7 @@ precedes the save scenarios and may affect timing; it is not a storage repair.
 The actual restart sequence and saved-blob equality remain unchanged.
 
 With Electron 45 / Chromium 156, a controlled LevelDB lock produced the same
-`pokebonk://game/` storage key but disk-open errors and
+`baoke://game/` storage key but disk-open errors and
 `Storage.LocalStorage.OpenDatabase.InMemory` plus
 `Storage.LocalStorage.Recovery.OpenFailure` histograms. Releasing the lock
 restored the original disk values. A healthy control recorded successful

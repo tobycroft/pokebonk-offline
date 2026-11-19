@@ -8,7 +8,7 @@ for(const name of ['ANDROID_KEYSTORE_PASSWORD','ANDROID_KEY_PASSWORD'])if(!proce
 const sdk=process.env['ANDROID_HOME']||process.env['ANDROID_SDK_ROOT'];
 if(!sdk)throw new Error('Android SDK root is required');
 const tools=path.join(sdk,'build-tools/36.0.0');
-const temp=await mkdtemp(path.join(os.tmpdir(),'pokebonk-sign-'));
+const temp=await mkdtemp(path.join(os.tmpdir(),'baoke-sign-'));
 try {
  const aligned=path.join(temp,'aligned.apk');
  execFileSync(path.join(tools,'zipalign'),['-P','16','-f','4',input,aligned],{stdio:'pipe'});

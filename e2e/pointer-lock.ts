@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 
 // Exercise Chromium's real Pointer Lock boundary through the production shell.
-const temp=await mkdtemp(path.join(os.tmpdir(),'pokebonk-pointer-lock-'));
+const temp=await mkdtemp(path.join(os.tmpdir(),'baoke-pointer-lock-'));
 const fixture=`<button id="lock">Lock pointer</button><script>
 window.result='idle';
 document.addEventListener('pointerlockchange',()=>window.result=document.pointerLockElement?'locked':'released');
@@ -21,7 +21,7 @@ await writeFile(path.join(temp,'index.html'),fixture+'<iframe src="/frame.html">
 await writeFile(path.join(temp,'frame.html'),fixture);
 const args=['dist/desktop/main.js'];
 if(process.env['CI']&&process.platform==='linux')args.push('--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader');
-const app=await electron.launch({args,env:{...process.env,POKEBONK_GAME_DIR:temp,POKEBONK_USER_DATA_DIR:path.join(temp,'profile')}});
+const app=await electron.launch({args,env:{...process.env,BAOKE_GAME_DIR:temp,BAOKE_USER_DATA_DIR:path.join(temp,'profile')}});
 try {
   const page=await app.firstWindow();
   await app.evaluate(({app,BrowserWindow})=>{app.focus({steal:true});BrowserWindow.getAllWindows()[0]?.focus();});
@@ -50,7 +50,7 @@ try {
   await app.evaluate(async({BrowserWindow})=>{
     const window=BrowserWindow.getAllWindows()[0];
     if(!window)throw new Error('Missing probe window');
-    await window.loadURL('pokebonk://game/index.html');
+    await window.loadURL('baoke://game/index.html');
   });
   // A control using the original policy must reproduce the denial.
   await app.evaluate(({session})=>{

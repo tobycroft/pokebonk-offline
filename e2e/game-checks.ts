@@ -28,7 +28,7 @@ export async function loadAchievementCards(page:Page,limit:number) {
 
 export async function checkGame(page: Page,metadata: BuildMetadata,label: string,{gameplay=true,pointerLock=false,focusPointerInput}:{gameplay?:boolean;pointerLock?:boolean;focusPointerInput?:()=>Promise<void>}={}) {
   await page.addInitScript(()=>{
-    const key='pokebonk.local.profile.v1';
+    const key='baoke.local.profile.v1';
     const value: unknown=JSON.parse(localStorage.getItem(key)||'{}');
     if (typeof value!=='object' || value===null || Array.isArray(value)) throw new Error('Invalid saved profile');
     const profile=value as Record<string,unknown>;
@@ -38,7 +38,7 @@ export async function checkGame(page: Page,metadata: BuildMetadata,label: string
     localStorage.setItem(key,JSON.stringify(profile));
   });
   await page.reload();
-  await page.waitForFunction(()=>window.__pokebonkLocalApp?.meta?.profile?.localSandbox,null,{timeout:120000});
+  await page.waitForFunction(()=>window.__baokeLocalApp?.meta?.profile?.localSandbox,null,{timeout:120000});
   await page.getByRole('button',{name:/^成就 /}).waitFor({state:'visible',timeout:120000});
   await dismissMenuNotices(page);
   await page.getByRole('button',{name:'寶藏',exact:true}).click();
@@ -66,7 +66,7 @@ export async function checkGame(page: Page,metadata: BuildMetadata,label: string
     await Promise.all(images.map(async image=>{if(!(image instanceof HTMLImageElement))throw new Error('Invalid release icon');await image.decode();if(!image.naturalWidth)throw new Error('Undecoded release icon: '+image.src);}));
   });
   await page.getByRole('button',{name:'關閉',exact:true}).click();
-  const profile=await page.evaluate(()=>window.__pokebonkLocalApp.meta.profile);
+  const profile=await page.evaluate(()=>window.__baokeLocalApp.meta.profile);
   assert.equal(profile.league.length,metadata.league);
   assert.ok(profile.league.every(id=>(profile.wins[id]??0)===7));
   assert.equal(Object.keys(profile.lab).length,metadata.lab);
@@ -83,7 +83,7 @@ export async function checkGame(page: Page,metadata: BuildMetadata,label: string
   assert.equal(Object.keys(profile.quests).length,metadata.achievements);
   assert.equal(Object.values(profile.medals).filter(rank=>rank===metadata.medalRank).length,metadata.medals);
   for(const period of ['daily','weekly'] as const)assert.deepEqual(profile[period].claimed,[1,1,1,1]);
-  assert.equal(await page.evaluate(()=>window.__pokebonkLocalApp.meta.tasksReady()),0);
+  assert.equal(await page.evaluate(()=>window.__baokeLocalApp.meta.tasksReady()),0);
   assert.equal(await page.evaluate(()=>typeof Reflect.get(window,'process')),'undefined');
   assert.equal(await page.evaluate(()=>typeof Reflect.get(window,'require')),'undefined');
   assert.equal(await page.evaluate(()=>Boolean(navigator.serviceWorker?.controller)),false);
@@ -98,11 +98,11 @@ export async function checkGame(page: Page,metadata: BuildMetadata,label: string
   await loadAchievementCards(page,metadata.achievements);
   assert.equal(general+await page.locator('.q-card.done').count(),metadata.achievements);
   await page.getByRole('button',{name:'Esc 返回',exact:true}).click();
-  await page.evaluate(async()=>{await window.__pokebonkLocalApp.backend.chooseStarter(null,150);localStorage.setItem('native-proof','saved');});
+  await page.evaluate(async()=>{await window.__baokeLocalApp.backend.chooseStarter(null,150);localStorage.setItem('native-proof','saved');});
   await page.reload();
-  await page.waitForFunction(()=>window.__pokebonkLocalApp?.meta?.profile?.lastSpecies===150,null,{timeout:120000});
+  await page.waitForFunction(()=>window.__baokeLocalApp?.meta?.profile?.lastSpecies===150,null,{timeout:120000});
   assert.equal(await page.evaluate(()=>localStorage.getItem('native-proof')),'saved');
-  assert.equal(await page.evaluate(()=>Object.keys(window.__pokebonkLocalApp.meta.profile.quests).length),metadata.achievements);
+  assert.equal(await page.evaluate(()=>Object.keys(window.__baokeLocalApp.meta.profile.quests).length),metadata.achievements);
   await dismissMenuNotices(page);
   await page.getByRole('button',{name:/^開始遊戲/}).click();
   await page.locator('.ls-tile').first().waitFor({state:'visible'});
@@ -111,9 +111,9 @@ export async function checkGame(page: Page,metadata: BuildMetadata,label: string
   await page.locator('.ls-tile').and(page.getByRole('button',{name:'超夢',exact:true})).click();
   assert.equal(await page.locator('.ls-won').count(),3);
   assert.equal(await page.locator('.ls-won.on').count(),3);
-  await page.waitForFunction(()=>(window.__pokebonkLocalApp.menuScene?.sprites.batches.get(150)?.mesh.count??0)>0);
+  await page.waitForFunction(()=>(window.__baokeLocalApp.menuScene?.sprites.batches.get(150)?.mesh.count??0)>0);
   const previewMesh=await page.evaluateHandle(()=>{
-    const mesh=window.__pokebonkLocalApp.menuScene?.sprites.batches.get(150)?.mesh;
+    const mesh=window.__baokeLocalApp.menuScene?.sprites.batches.get(150)?.mesh;
     if(!mesh?.parent)throw new Error('Expected visible Mewtwo preview');
     return mesh;
   });
@@ -130,8 +130,8 @@ export async function checkGame(page: Page,metadata: BuildMetadata,label: string
     {species:152,biome:'encina',tier:0},
     {species:249,biome:'iris',tier:1},
   ]) {
-    assert.equal(await page.evaluate(config=>window.__pokebonkLocalApp.startRun({...config,boosts:[]}),config),true);
-    await page.waitForFunction(()=>(window.__pokebonkLocalApp.run?.time ?? 0)>3,null,{timeout:90000});
+    assert.equal(await page.evaluate(config=>window.__baokeLocalApp.startRun({...config,boosts:[]}),config),true);
+    await page.waitForFunction(()=>(window.__baokeLocalApp.run?.time ?? 0)>3,null,{timeout:90000});
     assert.equal(await previewMesh.evaluate(mesh=>mesh.parent===null),true,'Character preview must be removed from the gameplay scene');
     if(pointerLock&&config.biome==='forest') {
       await focusPointerInput?.();
@@ -139,42 +139,42 @@ export async function checkGame(page: Page,metadata: BuildMetadata,label: string
       // locator hit-testing while native capture has already hidden the cursor.
       await page.keyboard.press('w');
       await page.waitForFunction(()=>document.pointerLockElement?.tagName==='CANVAS');
-      assert.equal(await page.evaluate(()=>window.__pokebonkLocalApp.run?.state),'play');
-      const yaw=await page.evaluate(()=>window.__pokebonkLocalApp.run?.camYaw);
+      assert.equal(await page.evaluate(()=>window.__baokeLocalApp.run?.state),'play');
+      const yaw=await page.evaluate(()=>window.__baokeLocalApp.run?.camYaw);
       await page.mouse.move(640,360);
       await page.mouse.move(680,370,{steps:8});
-      await page.waitForFunction(yaw=>window.__pokebonkLocalApp.run?.camYaw!==yaw,yaw);
+      await page.waitForFunction(yaw=>window.__baokeLocalApp.run?.camYaw!==yaw,yaw);
       await page.keyboard.press('Escape');
-      await page.waitForFunction(()=>document.pointerLockElement===null&&window.__pokebonkLocalApp.run?.state==='paused');
-      await page.evaluate(()=>window.__pokebonkLocalApp.run?.resume());
+      await page.waitForFunction(()=>document.pointerLockElement===null&&window.__baokeLocalApp.run?.state==='paused');
+      await page.evaluate(()=>window.__baokeLocalApp.run?.resume());
       await page.keyboard.press('w');
-      await page.waitForFunction(()=>document.pointerLockElement?.tagName==='CANVAS'&&window.__pokebonkLocalApp.run?.state==='play');
+      await page.waitForFunction(()=>document.pointerLockElement?.tagName==='CANVAS'&&window.__baokeLocalApp.run?.state==='play');
       // Upstream can mangle private method names. Exercise the player's map
       // shortcut and verify the visible map as well as native pointer release.
       await page.keyboard.press('KeyM');
       await page.locator('.bigmap').waitFor({state:'visible',timeout:5000});
-      await page.waitForFunction(()=>document.pointerLockElement===null&&window.__pokebonkLocalApp.run?.state==='paused');
+      await page.waitForFunction(()=>document.pointerLockElement===null&&window.__baokeLocalApp.run?.state==='paused');
       await page.keyboard.press('KeyM');
       await page.locator('.bigmap').waitFor({state:'hidden',timeout:5000});
-      await page.waitForFunction(()=>window.__pokebonkLocalApp.run?.state==='play');
+      await page.waitForFunction(()=>window.__baokeLocalApp.run?.state==='play');
       await page.keyboard.press('w');
       await page.waitForFunction(()=>document.pointerLockElement?.tagName==='CANVAS');
       console.log(label,'pointer lock, camera movement, Escape, resume and map release passed');
       // Invoke the real gameplay checkpoint, including its meta report adapter,
       // without holding native pointer capture during a long timer wait.
-      await page.evaluate(()=>{const run=window.__pokebonkLocalApp.run;if(!run)throw new Error('Missing active run');run.checkpoint();});
-      await page.waitForFunction(()=>localStorage.getItem('pokebonk.local.pending.v1')!==null);
-      const pending=record(JSON.parse(await page.evaluate(()=>localStorage.getItem('pokebonk.local.pending.v1')??'null')),'live checkpoint');
+      await page.evaluate(()=>{const run=window.__baokeLocalApp.run;if(!run)throw new Error('Missing active run');run.checkpoint();});
+      await page.waitForFunction(()=>localStorage.getItem('baoke.local.pending.v1')!==null);
+      const pending=record(JSON.parse(await page.evaluate(()=>localStorage.getItem('baoke.local.pending.v1')??'null')),'live checkpoint');
       assert.match(text(record(pending['ticket'])['id']),/^local-/);
       record(pending['result'],'live checkpoint result');
       console.log(label,'live checkpoint persisted locally');
     }
     if(config.biome==='glacier') {
-      await page.evaluate(()=>{const r=window.__pokebonkLocalApp.run;if(!r)throw new Error('Expected active run');r.boss.spawn(91,r.player.pos.x+8,r.player.pos.z,false);const i=r.boss.bossIndex;for(const key of ['poison','sleep','para'] as const)r.enemies[key][i]=20;r.enemies.poisonStacks[i]=3;});
+      await page.evaluate(()=>{const r=window.__baokeLocalApp.run;if(!r)throw new Error('Expected active run');r.boss.spawn(91,r.player.pos.x+8,r.player.pos.z,false);const i=r.boss.bossIndex;for(const key of ['poison','sleep','para'] as const)r.enemies[key][i]=20;r.enemies.poisonStacks[i]=3;});
       await page.waitForFunction(()=>{const images=[...document.querySelectorAll<HTMLImageElement>('.bossbar .bb-sti img')];return images.length>=3&&images.every(image=>image.complete&&image.naturalWidth>0);},null,{timeout:15000});
     }
-    runs.push(await page.evaluate(()=>{const r=window.__pokebonkLocalApp.run;if(!r)throw new Error('Expected active run');return {species:r.startSpecies,biome:r.biome.id,time:r.time,mode:r.mode};}));
-    await page.evaluate(async()=>{const a=window.__pokebonkLocalApp;if(!a.run)throw new Error('Expected active run');a.run.endHow='quit';await a.run.finish(false,true);a.toMenu();});
+    runs.push(await page.evaluate(()=>{const r=window.__baokeLocalApp.run;if(!r)throw new Error('Expected active run');return {species:r.startSpecies,biome:r.biome.id,time:r.time,mode:r.mode};}));
+    await page.evaluate(async()=>{const a=window.__baokeLocalApp;if(!a.run)throw new Error('Expected active run');a.run.endHow='quit';await a.run.finish(false,true);a.toMenu();});
     if(pointerLock)await page.waitForFunction(()=>document.pointerLockElement===null);
     console.log(label,'gameplay passed:',config.biome);
   }

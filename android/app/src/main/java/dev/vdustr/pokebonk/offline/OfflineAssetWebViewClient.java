@@ -1,4 +1,4 @@
-package dev.vdustr.pokebonk.offline;
+package dev.vdustr.baoke.offline;
 
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
