@@ -26,8 +26,8 @@ try {
   page.on('pageerror',error=>startupErrors.push(error.message));
   await page.addInitScript(()=>{
     Reflect.set(window,'__baokeSmokeBootState','pending');
-    addEventListener('pokebonk:modules-ready',()=>Reflect.set(window,'__baokeSmokeBootState','ready'));
-    addEventListener('pokebonk:boot-failed',()=>Reflect.set(window,'__baokeSmokeBootState','failed'));
+    addEventListener('baoke:modules-ready',()=>Reflect.set(window,'__baokeSmokeBootState','ready'));
+    addEventListener('baoke:boot-failed',()=>Reflect.set(window,'__baokeSmokeBootState','failed'));
   });
   // Install observers before navigation so an early boot refusal is observable.
   await page.reload();

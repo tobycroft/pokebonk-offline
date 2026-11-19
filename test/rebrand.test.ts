@@ -232,3 +232,11 @@ test('final brand pass replaces every literal form without doubling',()=>{
   assert.doesNotMatch(patchAllBrandMentions('PokéBonk Pokémon Bonk Pokédex'),/Poké|Bonk/);
   assert.equal(patchAllBrandMentions('宝可 已是中文'),'宝可 已是中文');
 });
+
+test('final pass rewrites boot handshake events on both dispatch and listen sides',()=>{
+  const source=`addEventListener('pokebonk:boot-failed',()=>recover());dispatchEvent(new Event(\`pokebonk:modules-ready\`));`;
+  const patched=patchAllBrandMentions(source);
+  assert.match(patched,/baoke:boot-failed/);
+  assert.match(patched,/baoke:modules-ready/);
+  assert.doesNotMatch(patched,/pokebonk:/);
+});

@@ -325,6 +325,12 @@ export function patchHtmlBranding(source:string) { return replaceBrand(source,'H
 // legal page, the PokéBonk.com domain and the Pokémon/Pokédex terms, per the
 // requested full literal replacement. vendor/ sources stay pristine; only the
 // in-memory output copy is changed, so snapshot SHA-256 validation is intact.
+// The boot handshake events are dispatched by the upstream main bundle and
+// listened for by both the upstream index.html recovery path and our e2e
+// probes. Both ends must use the same names, so rewrite them here on the
+// generated copy (vendor sources stay pristine).
 export function patchAllBrandMentions(source:string) {
-  return source.replaceAll('PokéBonk',brandName).replaceAll('Poké',brandName).replaceAll('Bonk',brandName);
+  return source.replaceAll('PokéBonk',brandName).replaceAll('Poké',brandName).replaceAll('Bonk',brandName)
+    .replaceAll('pokebonk:modules-ready','baoke:modules-ready')
+    .replaceAll('pokebonk:boot-failed','baoke:boot-failed');
 }
