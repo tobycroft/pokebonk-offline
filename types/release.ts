@@ -12,7 +12,7 @@ export function buildId(value:unknown) {
 }
 export function releaseIdentity(upstreamVersion:unknown,offlineVersion:unknown,upstreamBuild:unknown) {
   const game=version(upstreamVersion),offline=version(offlineVersion),build=buildId(upstreamBuild);
-  return {tag:`upstream-v${game}-offline-v${offline}-build-${build}`,title:`PokéBonk ${game} · Offline ${offline}`,upstreamVersion:game,offlineVersion:offline,upstreamBuild:build};
+  return {tag:`upstream-v${game}-offline-v${offline}-build-${build}`,title:`Baoke ${game} · Offline ${offline}`,upstreamVersion:game,offlineVersion:offline,upstreamBuild:build};
 }
 export function parseProvenance(value:unknown) {
   const raw=record(value,'release provenance');

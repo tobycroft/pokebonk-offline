@@ -96,7 +96,7 @@ if(mode!=='publish'&&!prepared) {
   for(const [platform,arch] of desktopTargets)node('scripts/package-electron.ts',game,directory,platform,arch);
   node('scripts/stage-android.ts',game);
   run('android/gradlew',['--project-dir','android','--no-daemon',`-PpokebonkVersionCode=${code}`,`-PpokebonkVersionName=${info.offlineVersion}`,'assembleRelease','lintRelease']);
-  const apkName=`pokebonk-offline-${info.offlineVersion}-unlocked-android.apk`;
+  const apkName=`baoke-offline-${info.offlineVersion}-unlocked-android.apk`;
   const apk=path.join(directory,apkName);
   console.log('+ Sign Android APK with the existing pinned certificate');
   execFileSync(process.execPath,['scripts/sign-android.ts','android/app/build/outputs/apk/release/app-release-unsigned.apk',apk,keystore],{stdio:'inherit',env:process.env});
@@ -108,8 +108,8 @@ if(mode!=='publish'&&!prepared) {
   const {rm}=await import('node:fs/promises');await rm(idsig,{force:true});
   for(const [platform,arch] of desktopTargets) {
     const archive=releaseFiles(info).find(name=>name.includes(`-${platform}-${arch}-`));assert.ok(archive);
-    const root=`Pokebonk Offline-${platform}-${arch}`;
-    const metadata=platform==='darwin'?`${root}/Pokebonk Offline.app/Contents/Resources/game/offline-build.json`:`${root}/resources/game/offline-build.json`;
+    const root=`Baoke Offline-${platform}-${arch}`;
+    const metadata=platform==='darwin'?`${root}/Baoke Offline.app/Contents/Resources/game/offline-build.json`:`${root}/resources/game/offline-build.json`;
     const value=capture(platform==='linux'?'tar':'unzip',platform==='linux'?['-xOf',path.join(directory,archive),metadata]:['-p',path.join(directory,archive),metadata]);
     assert.deepEqual(parseProvenance(JSON.parse(value)),info,'Packaged desktop source differs');
   }
@@ -117,9 +117,9 @@ if(mode!=='publish'&&!prepared) {
   const nativeArchive=releaseFiles(info).find(name=>name.includes(`-darwin-${process.arch}-`));assert.ok(nativeArchive);
   const extracted=path.join(work,'native');await mkdir(extracted,{recursive:true});
   run('ditto',['-x','-k',path.join(directory,nativeArchive),extracted]);
-  const app=path.join(extracted,`Pokebonk Offline-darwin-${process.arch}/Pokebonk Offline.app`);
+  const app=path.join(extracted,`Baoke Offline-darwin-${process.arch}/Baoke Offline.app`);
   node('scripts/verify-macos-electron-app.ts',app);
-  node('e2e/electron.ts',path.join(app,'Contents/Resources/game'),path.join(app,'Contents/MacOS/Pokebonk Offline'));
+  node('e2e/electron.ts',path.join(app,'Contents/Resources/game'),path.join(app,'Contents/MacOS/Baoke Offline'));
   assertPublishSource(head,head,capture('git',['status','--porcelain','--untracked-files=normal']));
   assert.equal(await sourceDigest(),info.sourceDigest,'Source changed during validation');
   await writeFile(path.join(work,'notes.md'),releaseNotes(info,await readFile('CHANGELOG.md','utf8')));

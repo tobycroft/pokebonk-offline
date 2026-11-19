@@ -14,8 +14,8 @@ export function findRelease(tag:string,request:(endpoint:string)=>unknown) {
   }
 }
 export function releaseFiles(info:ReleaseProvenance) {
-  return [...desktopTargets.map(([platform,arch])=>`pokebonk-offline-${info.offlineVersion}-unlocked-${platform}-${arch}-game-${info.upstreamVersion}-${info.upstreamBuild}.${platform==='linux'?'tar.gz':'zip'}`),
-    `pokebonk-offline-${info.offlineVersion}-unlocked-android.apk`,'release-info.json','SHA256SUMS.txt'];
+  return [...desktopTargets.map(([platform,arch])=>`baoke-offline-${info.offlineVersion}-unlocked-${platform}-${arch}-game-${info.upstreamVersion}-${info.upstreamBuild}.${platform==='linux'?'tar.gz':'zip'}`),
+    `baoke-offline-${info.offlineVersion}-unlocked-android.apk`,'release-info.json','SHA256SUMS.txt'];
 }
 // The migration floor exceeds the former 100000 + Actions run number.
 // Full-history commit counts increase on main, including upstream-only commits.

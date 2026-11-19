@@ -17,7 +17,7 @@ android {
         versionName = generatedVersionName.get()
     }
 
-    defaultConfig { resValue("string", "app_name", "PokéBonk Offline") }
+    defaultConfig { resValue("string", "app_name", "Baoke Offline") }
 
     buildTypes {
         release {

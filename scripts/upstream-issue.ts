@@ -49,7 +49,7 @@ export function reconcileVersionIssue(repository:string,accepted:UpstreamIdentit
   }
   if(!changed)return {action:'current' as const};
   // A later run rediscovers the issue if GitHub accepted the POST but its response was lost.
-  return {action:'created' as const,issue:store.create('PokéBonk upstream update tracker',body).number};
+  return {action:'created' as const,issue:store.create('Baoke upstream update tracker',body).number};
 }
 
 type IssueRequest=(method:'GET'|'POST'|'PATCH',endpoint:string,payload?:Record<string,unknown>)=>unknown;

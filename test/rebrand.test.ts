@@ -7,11 +7,11 @@ function j5(e=\`normal\`){let t=e===\`hero\`;return Z(\`div\`,{class:\`logo\`},Z
 function J5(e,t=!1){return Z(\`div\`,{class:\`mm-legal\`},Z(\`p\`,{},c(\`PokéBonk es un fan-game\`)))}
 `;
 
-test('menu logo becomes the Chinese brand while the footer content is removed',()=>{
+test('menu logo becomes the display brand while the footer content is removed',()=>{
   const patched=patchMenuBranding(menus);
-  assert.match(patched,/"宝可"/);
-  assert.equal((patched.match(/"出击"/g)??[]).length,2);
-  assert.match(patched,/"宝可出击"/);
+  assert.match(patched,/"Bao"/);
+  assert.equal((patched.match(/"ke"/g)??[]).length,2);
+  assert.match(patched,/"Baoke"/);
   assert.doesNotMatch(patched,/`Poké`/);
   assert.doesNotMatch(patched,/`Bonk`/);
   assert.doesNotMatch(patched,/`\.com`/);

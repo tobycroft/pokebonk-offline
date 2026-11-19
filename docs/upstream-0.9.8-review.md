@@ -1,6 +1,6 @@
 # Upstream 0.9.8 resource and module review
 
-The reviewed input is PokéBonk 0.9.8, build `mw2lpvdy`, observed on November 5,
+The reviewed input is Baoke 0.9.8, build `mw2lpvdy`, observed on November 5,
 2026 (Asia/Taipei). Its predecessor is 0.8.86, build `mvwwqlzz`.
 
 ## Module ownership

@@ -1,9 +1,9 @@
 import {ast,nodesOf,one,literal,edits,maybeName,requireNode} from './source.ts';
 import type {AnyNode} from 'acorn';
 
-export const brandName='宝可出击';
+export const brandName='Baoke';
 
-const logoParts: Record<string,string>={'Poké':'宝可','Bonk':'出击','.com':'','PokéBonk':brandName};
+const logoParts: Record<string,string>={'Poké':'Bao','Bonk':'ke','.com':'','PokéBonk':brandName};
 const emptyFooter=`Z(\`div\`,{class:\`mm-legal\`})`;
 
 function namedFunction(tree:ReturnType<typeof ast>,name:string) {
