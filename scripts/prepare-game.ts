@@ -15,7 +15,7 @@ import {readSnapshot,snapshotDirectory} from './upstream-snapshot.ts';
 import {patchLiveRunAlias} from './live-run-alias.ts';
 import {patchOfflineFriends} from './offline-friends.ts';
 import {patchNativeOriginGate} from './native-origin.ts';
-import {patchMenuBranding,patchRemoveVersionBadge,patchRemoveLogout,patchRemoveMenuButtons,patchRemoveTopButtons,patchRemoveSeasonPanel,patchRemoveRankingTile,patchRemoveClanTile,patchRemoveEventCard,patchRemoveTrainerMailButtons,patchHideTrainerName,patchEntryBranding,patchHtmlBranding} from './rebrand.ts';
+import {patchMenuBranding,patchRemoveVersionBadge,patchRemoveLogout,patchRemoveMenuButtons,patchRemoveTopButtons,patchRemoveSeasonPanel,patchRemoveRankingTile,patchRemoveClanTile,patchRemoveEventCard,patchRemoveTrainerMailButtons,patchEntryBranding,patchHtmlBranding} from './rebrand.ts';
 import {cacheBustVersion,injectCacheBust,injectHtmlCacheBust} from './cache-bust.ts';
 import {readResourceContract,assertReviewedInputs,assertRequiredResources,resourceContractDigest} from './resource-contract.ts';
 
@@ -40,7 +40,7 @@ const sha=(value:string|Buffer)=>createHash('sha256').update(value).digest('hex'
 const patched = patchGame(main, config, await readFile('dist/runtime/local-backend.js','utf8'),modules.menuPath?{source:menus,path:modules.menuPath}:undefined);
 const live=patchLiveRunAlias(patched.main,patched.menus??patched.main);
 files.set(mainKey, Buffer.from(patchOfflineStorageError(patched.menus?live:patchOfflineFriends(live))));
-if(patched.menus)files.set(modules.menus.name,Buffer.from(patchRemoveTrainerMailButtons(patchHideTrainerName(patchRemoveEventCard(patchRemoveClanTile(patchRemoveRankingTile(patchRemoveSeasonPanel(patchRemoveTopButtons(patchRemoveMenuButtons(patchRemoveLogout(patchRemoveVersionBadge(patchMenuBranding(patchOptionalLookFrames(patchOfflineFriends(patched.menus),frameStyles))))))))))))));
+if(patched.menus)files.set(modules.menus.name,Buffer.from(patchRemoveTrainerMailButtons(patchRemoveEventCard(patchRemoveClanTile(patchRemoveRankingTile(patchRemoveSeasonPanel(patchRemoveTopButtons(patchRemoveMenuButtons(patchRemoveLogout(patchRemoveVersionBadge(patchMenuBranding(patchOptionalLookFrames(patchOfflineFriends(patched.menus),frameStyles)))))))))))));
 files.set(configKey, Buffer.from(patched.config));
 const entryKey=one([...files.keys()].filter(key=>key.endsWith('.js')&&html.includes(`src="./${key}"`)),'snapshot entry module');
 files.set(entryKey,Buffer.from(patchEntryBranding(patchNativeOriginGate(contents(entryKey)))));

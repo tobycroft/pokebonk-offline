@@ -43,7 +43,7 @@ class LocalSandboxBackend implements LocalBackendContract {
     if (!this.current) throw new Error("Load the local profile before changing it.");
     return this.current;
   }
-  account = { id: 'local-sandbox', name: 'Local Sandbox', guest: false };
+  account = { id: 'local-sandbox', name: 'FlameCloud', guest: false };
 
   season() { return __SEASON__(Date.now()); }
   events() { return __EVENTS__.filter(event => Date.parse(event.start) <= Date.now() && Date.parse(event.end) > Date.now()).map(event => ({ ...event, live: true, start: Date.parse(event.start), end: Date.parse(event.end) })); }
@@ -104,7 +104,7 @@ class LocalSandboxBackend implements LocalBackendContract {
     return structuredClone(next);
   }
   normalize(value: unknown): LocalProfile {
-    const defaults = localObject(__PROFILE__('Local Sandbox'));
+    const defaults = localObject(__PROFILE__('FlameCloud'));
     const saved = value === null ? {} : localObject(value);
     const merged = {...defaults, ...saved};
     const numbers = (key: string) => localList(merged[key] ?? [], localNumber);

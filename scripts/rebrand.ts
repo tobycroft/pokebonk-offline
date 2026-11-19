@@ -234,7 +234,7 @@ export function patchRemoveTrainerMailButtons(source:string) {
 }
 
 // The account name in the trainer bar is `ue=Z('b',{},o.guest?c('Invitado'):o.name)`,
-// which renders "Local Sandbox" offline. Clear the name text but keep the <b> element:
+// which renders the local account name offline. Clear the name text but keep the <b> element:
 // clanStatus still calls ue.prepend(clan tag), so the variable must stay defined.
 export function patchHideTrainerName(source:string) {
   const tree=ast(source);
