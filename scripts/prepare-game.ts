@@ -44,7 +44,7 @@ if(patched.menus)files.set(modules.menus.name,Buffer.from(patchRemoveTrainerMail
 files.set(configKey, Buffer.from(patched.config));
 const entryKey=one([...files.keys()].filter(key=>key.endsWith('.js')&&html.includes(`src="./${key}"`)),'snapshot entry module');
 files.set(entryKey,Buffer.from(patchEntryBranding(patchNativeOriginGate(contents(entryKey)))));
-const csp = "default-src 'self' blob: data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' blob:; frame-src 'none'; object-src 'none'";
+const csp = "default-src 'self' blob: data:; script-src 'self' 'unsafe-inline'; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; connect-src 'self' blob:; frame-src 'none'; object-src 'none'";
 // Native packages serve all assets directly; there is no PWA or service worker.
 const nativeHtml=patchHtmlBranding(html).replace(/<link[^>]+rel=["']manifest["'][^>]*>/g,'').replace('</head>', `<meta http-equiv="Content-Security-Policy" content="${csp}"><script>if(!localStorage.getItem('pokebonk.lang'))localStorage.setItem('pokebonk.lang','zh');</script></head>`);
 files.delete('manifest.webmanifest');
