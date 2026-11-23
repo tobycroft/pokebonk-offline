@@ -16,6 +16,8 @@ import {patchLiveRunAlias} from './live-run-alias.ts';
 import {patchOfflineFriends} from './offline-friends.ts';
 import {patchNativeOriginGate} from './native-origin.ts';
 import {patchMenuBranding,patchRemoveVersionBadge,patchRemoveLogout,patchRemoveMenuButtons,patchRemoveTopButtons,patchRemoveSeasonPanel,patchRemoveRankingTile,patchRemoveClanTile,patchRemoveEventCard,patchRemoveTrainerMailButtons,patchEntryBranding,patchHtmlBranding,patchRemoveXDefaultHreflang,patchAllBrandMentions} from './rebrand.ts';
+import {buildCharacterNameMap,characterNamesRemain,patchCharacterNames} from './character-names.ts';
+import type {Locale,Species} from './character-names.ts';
 import {cacheBustVersion,injectCacheBust,injectHtmlCacheBust} from './cache-bust.ts';
 import {readResourceContract,assertReviewedInputs,assertRequiredResources,resourceContractDigest} from './resource-contract.ts';
 
@@ -56,9 +58,16 @@ files.set('offline-build.json', Buffer.from(JSON.stringify({upstreamBuild:buildI
 // Exhaustive brand replacement across all generated text assets. This runs last
 // so earlier structural patches can still match the upstream Poké/Bonk anchors.
 // Only the in-memory output is touched; vendor/ sources and snapshot stay pristine.
+const characterNames=buildCharacterNameMap(
+  JSON.parse(contents('data/pokemon.json')) as Species[],
+  ['de','en','fr','ja','ko','pt','ru','zh','zht'].map(lang=>(JSON.parse(contents(`data/i18n/${lang}.json`)) as {pokemon:Locale}).pokemon)
+);
 for(const [key,data] of files)
-  if(key.endsWith('.js')||key.endsWith('.html')||key.endsWith('.json')||key.endsWith('.webmanifest')||key.endsWith('.css'))
-    files.set(key,Buffer.from(patchAllBrandMentions(data.toString())));
+  if(key.endsWith('.js')||key.endsWith('.html')||key.endsWith('.json')||key.endsWith('.webmanifest')||key.endsWith('.css')) {
+    const patched=patchCharacterNames(patchAllBrandMentions(data.toString()),characterNames);
+    if(characterNamesRemain(patched,characterNames))throw new Error(`Character names remain in ${key}`);
+    files.set(key,Buffer.from(patched));
+  }
 // Cache busting: derive one version from every finalized payload byte, then add
 // ?v=<version> to all asset URLs. This is done after all patches but before
 // writing, so name-based module detection and manifest paths stay intact while
